@@ -3,16 +3,16 @@ import torch
 
 from torch.optim.lr_scheduler import MultiStepLR
 
-from complex_neural_source_localization.model import DOACNet
+from complex_neural_source_localization.model import SSLNET
 from complex_neural_source_localization.loss import LOSS_NAME_TO_CLASS_MAP
 from complex_neural_source_localization.utils.base_trainer import (
     BaseTrainer, BaseLightningModule
 )
 
 
-class DOACNetTrainer(BaseTrainer):
+class SSLNETTrainer(BaseTrainer):
     def __init__(self, config):
-        lightning_module = DOACNetLightniningModule(config)
+        lightning_module = SSLNETLightniningModule(config)
         super().__init__(lightning_module,
                          config["training"]["n_epochs"])
 
@@ -24,10 +24,10 @@ class DOACNetTrainer(BaseTrainer):
         super().test(self._lightning_module, test_dataloaders, ckpt_path="best")
 
 
-class DOACNetLightniningModule(BaseLightningModule):
+class SSLNETLightniningModule(BaseLightningModule):
     """This class abstracts the
        training/validation/testing procedures
-       used for training a DOACNet
+       used for training a SSLNET
     """
 
     def __init__(self, config):
@@ -41,7 +41,7 @@ class DOACNetLightniningModule(BaseLightningModule):
             "use_onesided_fft": config["model"]["use_onesided_fft"]
         }
 
-        model = DOACNet(n_sources=n_sources,
+        model = SSLNET(n_sources=n_sources,
                         stft_config=stft_config,
                         **config["model"])
 

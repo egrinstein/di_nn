@@ -36,5 +36,6 @@ model:
   fc_layer_dropout_rate: 0.0
   activation: prelu # tanh | relu | prelu | amp_tanh
   pool_type: avg # max | avg
-  use_complex_rnn: True
+  is_fully_complex: True
   init_real_layers: True
+  is_parameterized: False

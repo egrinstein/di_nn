@@ -7,7 +7,7 @@ from complex_neural_source_localization.feature_extractors import (
 from complex_neural_source_localization.utils.conv_block import ConvBlock
 
 from complex_neural_source_localization.utils.complexPyTorch.complexLayers import (
-    ComplexGRU, ComplexLinear
+    ComplexGRU, ComplexLinear, ComplexPReLU, ComplexReLU
 )
 from complex_neural_source_localization.utils.model_utilities import init_gru, init_layer
 
@@ -21,7 +21,7 @@ DEFAULT_CONV_CONFIG = [
 DEFAULT_STFT_CONFIG = {"n_fft": 1024, "use_onesided_fft":True}
 
 
-class DOACNet(nn.Module):
+class SSLNET(nn.Module):
     def __init__(self, output_type="scalar", n_input_channels=4, n_sources=2,
                  pool_type="avg", pool_size=(1,2), kernel_size=(2, 2),
                  feature_type="stft",
@@ -29,8 +29,9 @@ class DOACNet(nn.Module):
                  stft_config=DEFAULT_STFT_CONFIG,
                  fc_layer_dropout_rate=0.5,
                  activation="relu",
-                 use_complex_rnn=False,
+                 is_fully_complex=False,
                  init_real_layers=True,
+                 is_parameterized=False,
                  **kwargs):
         
         super().__init__()
@@ -44,7 +45,10 @@ class DOACNet(nn.Module):
         self.kernel_size = kernel_size
         self.activation = activation
         self.max_filters = conv_layers_config[-1]["n_channels"]
-        self.is_rnn_complex = use_complex_rnn
+        self.is_fully_complex = is_fully_complex
+        self.is_parameterized = is_parameterized # Parameterized Neural Network:
+                                           # concatenate the microphone coordinates to the features before
+                                           # feeding them to the fully connected layers
 
         # 2. Create feature extractor
         self.feature_extractor = self._create_feature_extractor(feature_type, stft_config)
@@ -56,16 +60,19 @@ class DOACNet(nn.Module):
         self.rnn = self._create_rnn_block()
 
         # 5. Create linear block
-        self.azimuth_fc = self._create_linear_block(n_sources, fc_layer_dropout_rate)
+        self.fully_connected = self._create_fully_connected_block(n_sources, fc_layer_dropout_rate)
 
         # If using a real valued rnn, initialize gru and fc layers
-        if not use_complex_rnn and init_real_layers:
+        if not is_fully_complex and init_real_layers:
             init_gru(self.rnn)
-            init_layer(self.azimuth_fc)
+            init_layer(self.fully_connected)
     
     def forward(self, x):
-        # input: (batch_size, mic_channels, time_steps)
+        if self.is_parameterized:
+            parameters = x["mic_coordinates"]
+            x = x["signal"]
 
+        # input: (batch_size, mic_channels, time_steps)
         # 1. Extract STFT of signals
         x = self.feature_extractor(x)
         # (batch_size, mic_channels, n_freqs, stft_time_steps)
@@ -84,7 +91,7 @@ class DOACNet(nn.Module):
         # (batch_size, feature_maps, time_steps)
 
         # Preprocessing for RNN
-        if x.is_complex() and not self.is_rnn_complex:
+        if x.is_complex() and not self.is_fully_complex:
             x = complex_to_real(x)
         x = x.transpose(1,2)
         # (batch_size, time_steps, feature_maps):
@@ -94,9 +101,15 @@ class DOACNet(nn.Module):
         # (batch_size, time_steps, feature_maps):
         # Average across all time steps
         x = torch.mean(x, dim=1)
+        # (batch_size, feature_maps)
 
+        if self.is_parameterized:
+            # Concatenate parameters before sending to fully connected layer
+            x = torch.cat([x, parameters], dim=1)
+            # (batch_size, feature_maps + n_parameters)
+        
         # 5. Fully connected layer
-        x = self.azimuth_fc(x)
+        x = self.fully_connected(x)
         # (batch_size, class_num)
 
         if x.is_complex():
@@ -108,7 +121,6 @@ class DOACNet(nn.Module):
             self.n_input_channels = sum(range(self.n_input_channels + 1))
         
         return FEATURE_NAME_TO_CLASS_MAP[feature_type](stft_config)
-
 
     def _create_conv_blocks(self, conv_layers_config, init_weights):
         
@@ -140,7 +152,7 @@ class DOACNet(nn.Module):
         return nn.ModuleList(conv_blocks)
         
     def _create_rnn_block(self):
-        if self.is_rnn_complex:
+        if self.is_fully_complex:
             return ComplexGRU(input_size=self.max_filters//2,
                             hidden_size=self.max_filters//4,
                             batch_first=True, bidirectional=True)
@@ -149,19 +161,51 @@ class DOACNet(nn.Module):
                           hidden_size=self.max_filters//2,
                           batch_first=True, bidirectional=True)
 
-    def _create_linear_block(self, n_sources, fc_layer_dropout_rate):
-        if self.is_rnn_complex:
-            # TODO: Use dropout on complex linear block
-            return ComplexLinear(self.max_filters//2, n_sources)
+    def _create_fully_connected_block(self, n_sources, fc_layer_dropout_rate):
+        # TODO: Allow user to choose the number of linear layers
+        
+        if self.is_fully_complex:
+            layer_input_size = self.max_filters//2
+            if self.is_parameterized:
+                layer_input_size += self.n_input_channels
+                # Each microphone's coordinates is encoded by a complex number
+
+            if self.activation == "relu":
+                activation = ComplexReLU
+            elif self.activation == "prelu":
+                activation = ComplexPReLU
+
+            return nn.Sequential(
+                ComplexLinear(layer_input_size, layer_input_size),
+                activation(),
+                ComplexLinear(layer_input_size, n_sources),
+            )
         else:
+            layer_input_size = self.max_filters
+            if self.is_parameterized:
+                layer_input_size += 2*self.n_input_channels
+                # Each microphone's coordinates is encoded by two real numbers
+
+            if self.activation == "relu":
+                activation = nn.ReLU
+            elif self.activation == "prelu":
+                activation = nn.PReLU
+
             n_last_layer = 2*n_sources  # 2 cartesian dimensions for each source            
             if fc_layer_dropout_rate > 0:
                 return nn.Sequential(
-                    nn.Linear(self.max_filters, n_last_layer, bias=True),
+                    nn.Linear(layer_input_size, layer_input_size),
+                    activation(),
+                    nn.Dropout(fc_layer_dropout_rate),
+                    nn.Linear(layer_input_size, n_last_layer),
                     nn.Dropout(fc_layer_dropout_rate)
                 )
             else:
-                return nn.Linear(self.max_filters, n_last_layer, bias=True)
+                return nn.Sequential(
+                    nn.Linear(layer_input_size, layer_input_size),
+                    activation(),
+                    nn.Linear(layer_input_size, n_last_layer),
+                )
     
     def track_feature_maps(self):
         "Make all the intermediate layers accessible through the 'feature_maps' dictionary"
@@ -178,14 +222,14 @@ class DOACNet(nn.Module):
         hook_fn = self._create_hook_fn("rnn")
         self.rnn.register_forward_hook(hook_fn)
 
-        hook_fn = self._create_hook_fn("azimuth_fc")
-        self.azimuth_fc.register_forward_hook(hook_fn)
+        hook_fn = self._create_hook_fn("fully_connected")
+        self.fully_connected.register_forward_hook(hook_fn)
 
     def _create_hook_fn(self, layer_id):
         def fn(_, __, output):
             if type(output) == tuple:
                 output = output[0]
-            self.feature_maps[layer_id] = output.detach().cpu() #.cpu().detach()
+            self.feature_maps[layer_id] = output.detach().cpu()
         return fn
 
 

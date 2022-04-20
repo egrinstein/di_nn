@@ -1,5 +1,5 @@
 sr: 16000
-training_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset
+training_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset_2
 validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset
 test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset
 num_mics: 4

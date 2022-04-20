@@ -12,9 +12,15 @@ DATASET_NAME_TO_CLASS_MAP = {
 def create_dataloaders(config):
 
     dataset = DATASET_NAME_TO_CLASS_MAP[config["dataset"]["name"]]
-    dataset_train = dataset(config["dataset"]["training_dataset_dir"])
-    dataset_val = dataset(config["dataset"]["validation_dataset_dir"])
-    dataset_test = dataset(config["dataset"]["test_dataset_dir"])
+    dataset_train = dataset(config["dataset"]["training_dataset_dir"],
+                            config["model"]["is_parameterized"],
+                            config["model"]["is_fully_complex"])
+    dataset_val = dataset(config["dataset"]["validation_dataset_dir"],
+                            config["model"]["is_parameterized"],
+                            config["model"]["is_fully_complex"])
+    dataset_test = dataset(config["dataset"]["test_dataset_dir"],
+                            config["model"]["is_parameterized"],
+                            config["model"]["is_fully_complex"])
 
     batch_size = config["training"]["batch_size"]
     n_workers = config["training"]["n_workers"]

@@ -1,5 +1,5 @@
 from complex_neural_source_localization.datasets.dcase_2019_task3_dataset import load_multichannel_wav
-from complex_neural_source_localization.model import DOACNet
+from complex_neural_source_localization.model import SSLNET
 
 
 def test_tdoa_crnn10_with_stft():
@@ -12,7 +12,7 @@ def test_tdoa_crnn10_with_mfcc():
 
 def _test_tdoa_crnn10(feature_type):
 
-    model = DOACNet(n_sources=1)
+    model = SSLNET(n_sources=1)
     
     sample = load_multichannel_wav("tests/fixtures/0.0_split1_ir0_ov1_3.wav", 16000, 1)
 

@@ -24,11 +24,12 @@ class AngularLoss(Module):
 
 
 class CustomL1Loss(Module):
-    def __init__(self):
+    def __init__(self, is_parameterized=True):
         super().__init__()
 
         self.mse = L1Loss(reduction="none")
         self.target_key = "source_coordinates"
+        self.is_parameterized = is_parameterized
 
     def forward(self, model_output, targets, mean_reduce=True):
         targets = targets[self.target_key]

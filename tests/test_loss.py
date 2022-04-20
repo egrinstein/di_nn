@@ -3,13 +3,13 @@ import numpy as np
 import torch
 
 from complex_neural_source_localization.loss import Loss
-from complex_neural_source_localization.model import DOACNet
+from complex_neural_source_localization.model import SSLNET
 
 
 def test_neural_tdoa_loss():
 
     loss_fn = Loss()
-    model = DOACNet(n_sources=1)
+    model = SSLNET(n_sources=1)
 
     sample_path = "tests/fixtures/0.0_split1_ir0_ov1_3.wav"
 
