@@ -26,7 +26,8 @@ class SyntheticSSLDataset(SydraDataset):
 
         y = {
             "source_coordinates": source_coordinates,
-            "normalized_source_coordinates": source_coordinates/room_dims
+            "normalized_source_coordinates": source_coordinates/room_dims,
+            "room_dims": room_dims
         }
 
         if self.is_parameterized:
