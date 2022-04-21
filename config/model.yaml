@@ -38,4 +38,4 @@ model:
   pool_type: avg # max | avg
   is_fully_complex: True
   init_real_layers: True
-  is_parameterized: False
+  is_parameterized: True

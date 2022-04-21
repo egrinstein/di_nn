@@ -3,6 +3,7 @@ is because in theory the random generator implemented in Sydra could be reused f
 applications using two microphones, while this generator is specific for this application.
 """
 
+from sympy import source
 import torch
 
 from complex_neural_source_localization.datasets.sydra_dataset import SydraDataset
@@ -21,22 +22,23 @@ class SyntheticSSLDataset(SydraDataset):
         
         mic_coordinates = y["mic_coordinates"][:, :2] # Ignore z axis
         source_coordinates = y["source_coordinates"][:2]
+        room_dims = y["room_dims"][:2]
 
         y = {
-            "mic_coordinates": mic_coordinates,
-            "source_coordinates": source_coordinates
+            "source_coordinates": source_coordinates,
+            "normalized_source_coordinates": source_coordinates/room_dims
         }
 
         if self.is_parameterized:
+            parameters = torch.vstack([mic_coordinates, room_dims.unsqueeze(0)])
             if self.complex_parameters:
-                mic_coordinates = torch.complex(mic_coordinates[:, 0],
-                                                mic_coordinates[:, 1])
+                parameters = torch.complex(parameters[:, 0], parameters[:, 1])
             else:
-                mic_coordinates = mic_coordinates.flatten()
+                parameters = parameters.flatten()
 
             x = {
                 "signal": x,
-                "mic_coordinates": mic_coordinates
+                "parameters": parameters
             }
 
         return (x, y)

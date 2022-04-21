@@ -28,7 +28,7 @@ class CustomL1Loss(Module):
         super().__init__()
 
         self.mse = L1Loss(reduction="none")
-        self.target_key = "source_coordinates"
+        self.target_key = "normalized_source_coordinates"
         self.is_parameterized = is_parameterized
 
     def forward(self, model_output, targets, mean_reduce=True):

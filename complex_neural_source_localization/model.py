@@ -69,7 +69,7 @@ class SSLNET(nn.Module):
     
     def forward(self, x):
         if self.is_parameterized:
-            parameters = x["mic_coordinates"]
+            parameters = x["parameters"]
             x = x["signal"]
 
         # input: (batch_size, mic_channels, time_steps)
@@ -167,8 +167,9 @@ class SSLNET(nn.Module):
         if self.is_fully_complex:
             layer_input_size = self.max_filters//2
             if self.is_parameterized:
-                layer_input_size += self.n_input_channels
-                # Each microphone's coordinates is encoded by a complex number
+                layer_input_size += self.n_input_channels + 1
+                # Each microphone's coordinates is encoded by a complex number,
+                # plus the room dimensions
 
             if self.activation == "relu":
                 activation = ComplexReLU
@@ -183,8 +184,9 @@ class SSLNET(nn.Module):
         else:
             layer_input_size = self.max_filters
             if self.is_parameterized:
-                layer_input_size += 2*self.n_input_channels
+                layer_input_size += 2*(self.n_input_channels + 1)
                 # Each microphone's coordinates is encoded by two real numbers
+                # plus the two room dimensions
 
             if self.activation == "relu":
                 activation = nn.ReLU
