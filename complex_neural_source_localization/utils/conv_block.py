@@ -6,12 +6,20 @@ from complex_neural_source_localization.utils.complexPyTorch.complexLayers impor
 )
 from complex_neural_source_localization.utils.model_utilities import init_layer
 
+DEFAULT_CONV_CONFIG = [
+    {"type": "single", "n_channels": 64, "dropout_rate":0},
+    {"type": "single", "n_channels": 64, "dropout_rate":0},
+    {"type": "single", "n_channels": 64, "dropout_rate":0},
+    {"type": "single", "n_channels": 64, "dropout_rate":0},
+]
+
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, 
                 kernel_size=(3,3), stride=(1,1),
                 padding=(1,1), pool_size=(2, 2),
-                block_type="real_double",
+                block_type="double",
+                is_complex=False,
                 init=False,
                 dropout_rate=0.1,
                 activation="relu"):
@@ -20,8 +28,9 @@ class ConvBlock(nn.Module):
         self.block_type = block_type
         self.pool_size=pool_size
         self.dropout_rate = dropout_rate
+        self.is_complex = is_complex
 
-        if "complex" in block_type:
+        if is_complex:
             conv_block = ComplexConv2d
             bn_block = ComplexBatchNorm2d
             dropout_block = ComplexDropout
@@ -35,7 +44,6 @@ class ConvBlock(nn.Module):
                 self.activation = ComplexPReLU()
 
             self.pooling = ComplexAvgPool2d(pool_size)
-            self.is_real = False
             out_channels = out_channels//2
         else:
             conv_block = nn.Conv2d
@@ -43,7 +51,6 @@ class ConvBlock(nn.Module):
             dropout_block = nn.Dropout
             self.activation = nn.ReLU()
             self.pooling = nn.AvgPool2d(pool_size)
-            self.is_real = True
 
         self.conv1 = conv_block(in_channels=in_channels, 
                             out_channels=out_channels,
@@ -52,7 +59,7 @@ class ConvBlock(nn.Module):
         self.bn1 = bn_block(out_channels)
         self.dropout = dropout_block(dropout_rate)
 
-        if "double" in block_type: 
+        if block_type == "double": 
             self.conv2 = conv_block(in_channels=out_channels, 
                                 out_channels=out_channels,
                                 kernel_size=kernel_size, stride=stride,
@@ -62,13 +69,13 @@ class ConvBlock(nn.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
 
-        if init and "real" in block_type:
+        if init and not is_complex:
             # TODO: Implement complex-valued initialization
             self._init_weights()
         
     def forward(self, x):
         x = self.activation(self.bn1(self.conv1(x)))
-        if "double" in self.block_type:
+        if self.block_type == "double":
             x = self.activation(self.bn2(self.conv2(x)))
         x = self.pooling(x)
         
@@ -79,6 +86,6 @@ class ConvBlock(nn.Module):
     def _init_weights(self):
         init_layer(self.conv1)
         init_layer(self.bn1)
-        if self.block_type == "real_double":
+        if self.block_type == "double":
             init_layer(self.conv2)
             init_layer(self.bn2)

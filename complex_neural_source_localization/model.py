@@ -2,23 +2,16 @@ import torch
 import torch.nn as nn
 
 from complex_neural_source_localization.feature_extractors import (
+    DEFAULT_STFT_CONFIG,
     FEATURE_NAME_TO_CLASS_MAP
 )
-from complex_neural_source_localization.utils.conv_block import ConvBlock
-
+from complex_neural_source_localization.utils.conv_block import (
+    DEFAULT_CONV_CONFIG, ConvBlock
+)
 from complex_neural_source_localization.utils.complexPyTorch.complexLayers import (
     ComplexGRU, ComplexLinear, ComplexPReLU, ComplexReLU
 )
 from complex_neural_source_localization.utils.model_utilities import init_gru, init_layer
-
-DEFAULT_CONV_CONFIG = [
-    {"type": "complex_single", "n_channels": 64, "dropout_rate":0},
-    {"type": "complex_single", "n_channels": 64, "dropout_rate":0},
-    {"type": "complex_single", "n_channels": 64, "dropout_rate":0},
-    {"type": "complex_single", "n_channels": 64, "dropout_rate":0},
-]
-
-DEFAULT_STFT_CONFIG = {"n_fft": 1024, "use_onesided_fft":True}
 
 
 class SSLNET(nn.Module):
@@ -49,6 +42,7 @@ class SSLNET(nn.Module):
         self.is_parameterized = is_parameterized # Parameterized Neural Network:
                                            # concatenate the microphone coordinates to the features before
                                            # feeding them to the fully connected layers
+        print(conv_layers_config)
 
         # 2. Create feature extractor
         self.feature_extractor = self._create_feature_extractor(feature_type, stft_config)
@@ -75,14 +69,14 @@ class SSLNET(nn.Module):
         # input: (batch_size, mic_channels, time_steps)
         # 1. Extract STFT of signals
         x = self.feature_extractor(x)
+        if x.is_complex() and not self.is_fully_complex:
+            x = complex_to_real(x)
         # (batch_size, mic_channels, n_freqs, stft_time_steps)
         x = x.transpose(2, 3)
         # (batch_size, mic_channels, stft_time_steps, n_freqs)
-        
+
         # 2. Extract features using convolutional layers
         for conv_block in self.conv_blocks:
-            if x.is_complex() and conv_block.is_real:
-                x = complex_to_real(x)
             x = conv_block(x)
         # (batch_size, feature_maps, time_steps, n_freqs)
 
@@ -91,8 +85,6 @@ class SSLNET(nn.Module):
         # (batch_size, feature_maps, time_steps)
 
         # Preprocessing for RNN
-        if x.is_complex() and not self.is_fully_complex:
-            x = complex_to_real(x)
         x = x.transpose(1,2)
         # (batch_size, time_steps, feature_maps):
         
@@ -118,35 +110,43 @@ class SSLNET(nn.Module):
 
     def _create_feature_extractor(self, feature_type, stft_config):
         if feature_type == "cross_spectra":
-            self.n_input_channels = sum(range(self.n_input_channels + 1))
+            self.n_feature_extractor_channels = sum(range(self.n_input_channels + 1))
+        else:
+            self.n_feature_extractor_channels = self.n_input_channels
+
+        feature_extractor = FEATURE_NAME_TO_CLASS_MAP[feature_type](stft_config)
         
-        return FEATURE_NAME_TO_CLASS_MAP[feature_type](stft_config)
+        if feature_extractor.is_complex and not self.is_fully_complex:
+            # channels will be separated into real and imaginary components
+            self.n_feature_extractor_channels *= 2
+        
+        return feature_extractor
 
     def _create_conv_blocks(self, conv_layers_config, init_weights):
         
         conv_blocks = [
-            ConvBlock(self.n_input_channels, conv_layers_config[0]["n_channels"],
+            ConvBlock(self.n_feature_extractor_channels, conv_layers_config[0]["n_channels"],
                       block_type=conv_layers_config[0]["type"],
                       dropout_rate=conv_layers_config[0]["dropout_rate"],
                       pool_size=self.pool_size,
                       activation=self.activation,
                       kernel_size=self.kernel_size,
+                      is_complex=self.is_fully_complex,
                       init=init_weights),
         ]
 
         for i, config in enumerate(conv_layers_config[1:]):
             last_layer = conv_blocks[-1]
             in_channels = last_layer.out_channels
-            if last_layer.is_real == False and "complex" not in config["type"]:
-                # complex convolutions are performed using 2 convolutions of half the filters
-                in_channels *= 2
             conv_blocks.append(
                 ConvBlock(in_channels, config["n_channels"],
-                          block_type=config["type"], init=init_weights,
+                          block_type=config["type"],
                           dropout_rate=config["dropout_rate"],
                           pool_size=self.pool_size,
                           activation=self.activation,
-                          kernel_size=self.kernel_size)
+                          kernel_size=self.kernel_size,
+                          is_complex=self.is_fully_complex,
+                          init=init_weights)
             )
         
         return nn.ModuleList(conv_blocks)
@@ -176,6 +176,7 @@ class SSLNET(nn.Module):
             elif self.activation == "prelu":
                 activation = ComplexPReLU
 
+            # TODO: implement dropout for complex networks
             return nn.Sequential(
                 ComplexLinear(layer_input_size, layer_input_size),
                 activation(),

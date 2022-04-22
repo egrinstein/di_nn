@@ -4,10 +4,15 @@ from torch.nn import Module
 from torchaudio.transforms import MelSpectrogram
 
 
+DEFAULT_STFT_CONFIG = {"n_fft": 1024, "use_onesided_fft":True}
+
+
 class MfccArray(Module):
     def __init__(self, model_config, dataset_config):
 
         super().__init__()
+
+        self.is_complex = False
 
         self.mel_spectrogram = MelSpectrogram(
             sample_rate=dataset_config["sr"],
@@ -36,6 +41,7 @@ class StftArray(Module):
 
         self.n_fft = model_config["n_fft"]
         self.onesided = model_config["use_onesided_fft"]
+        self.is_complex = True
 
     def forward(self, X):
         "Expected input has shape (batch_size, n_arrays, time_steps)"
@@ -55,12 +61,20 @@ class StftArray(Module):
 
 
 class StftMagnitudeArray(StftArray):
+    def __init__(self, model_config):
+        super().__init__(model_config)
+        self.is_complex = False
+
     def forward(self, X):
         stft = super().forward(X)
         return stft.abs()
 
 
 class StftPhaseArray(StftArray):
+    def __init__(self, model_config):
+        super().__init__(model_config)
+        self.is_complex = False
+
     def forward(self, X):
         stft = super().forward(X)
         return stft.angle()
@@ -68,6 +82,10 @@ class StftPhaseArray(StftArray):
 
 class DecoupledStftArray(StftArray):
     "Stft where the real and imaginary channels are modeled as separate channels"
+    def __init__(self, model_config):
+        super().__init__(model_config)
+        self.is_complex = False
+
     def forward(self, X):
 
         stft = super().forward(X)
@@ -79,6 +97,10 @@ class DecoupledStftArray(StftArray):
 
 
 class CrossSpectra(Module):
+    def __init__(self, model_config):
+        super().__init__(model_config)
+        self.is_complex = True
+
     def __init__(self, model_config):
 
         super().__init__()

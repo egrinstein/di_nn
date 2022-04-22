@@ -16,19 +16,19 @@ model:
   kernel_size: [2, 2] # [1, 1] = "Beamforming" convolution | [2, 1] = Time averaging | [1, 2] = Frequency averaging
   conv_layers_config:
     - layer_1:
-      type: complex_single # complex_single | real_single | complex_double | real_double
+      type: double # single: one layer | double: two layers
       n_channels: 64
       dropout_rate: 0.0
     - layer_2:
-      type: complex_single
+      type: double
       n_channels: 128
       dropout_rate: 0.0
     - layer_3:
-      type: complex_single
+      type: double
       n_channels: 256
       dropout_rate: 0.0
     - layer_4:
-      type: complex_single
+      type: double
       n_channels: 512
       dropout_rate: 0.0
 
@@ -36,6 +36,6 @@ model:
   fc_layer_dropout_rate: 0.0
   activation: prelu # tanh | relu | prelu | amp_tanh
   pool_type: avg # max | avg
-  is_fully_complex: True
+  is_fully_complex: False
   init_real_layers: True
   is_parameterized: True
