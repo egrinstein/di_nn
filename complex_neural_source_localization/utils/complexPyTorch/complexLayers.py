@@ -18,7 +18,6 @@ from torch.nn import (
 )
 
 from .complexFunctions import (
-    complex_amp_tanh,
     complex_relu,
     complex_tanh,
     complex_sigmoid,
@@ -95,26 +94,18 @@ class ComplexAvgPool2d(Module):
 
 
 class ComplexReLU(Module):
-
     def forward(self, input):
         return complex_relu(input)
 
 
 class ComplexSigmoid(Module):
-
     def forward(self, input):
         return complex_sigmoid(input)
 
 
 class ComplexTanh(Module):
-
     def forward(self, input):
         return complex_tanh(input)
-
-
-class ComplexAmpTanh(Module):
-    def forward(self, input):
-        return complex_amp_tanh(input)
 
 
 class ComplexPReLU(Module):

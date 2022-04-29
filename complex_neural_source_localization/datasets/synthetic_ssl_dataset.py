@@ -23,19 +23,21 @@ class SyntheticSSLDataset(SydraDataset):
         mic_coordinates = y["mic_coordinates"][:, :2] # Ignore z axis
         source_coordinates = y["source_coordinates"][:2]
         room_dims = y["room_dims"][:2]
+        rt60 = torch.Tensor([y["rt60"]])
 
         y = {
             "source_coordinates": source_coordinates,
             "normalized_source_coordinates": source_coordinates/room_dims,
-            "room_dims": room_dims
+            "room_dims": room_dims,
+            "rt60": rt60
         }
 
         if self.is_parameterized:
-            parameters = torch.vstack([mic_coordinates, room_dims.unsqueeze(0)])
             if self.complex_parameters:
-                parameters = torch.complex(parameters[:, 0], parameters[:, 1])
+                parameters = torch.complex(mic_coordinates[:, 0], mic_coordinates[:, 1])
+                parameters = torch.stack([parameters, torch.complex(rt60, 0)])
             else:
-                parameters = parameters.flatten()
+                parameters = torch.hstack([mic_coordinates.flatten(), rt60])
 
             x = {
                 "signal": x,

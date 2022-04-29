@@ -42,7 +42,6 @@ class SSLNET(nn.Module):
         self.is_parameterized = is_parameterized # Parameterized Neural Network:
                                            # concatenate the microphone coordinates to the features before
                                            # feeding them to the fully connected layers
-        print(conv_layers_config)
 
         # 2. Create feature extractor
         self.feature_extractor = self._create_feature_extractor(feature_type, stft_config)
@@ -169,7 +168,7 @@ class SSLNET(nn.Module):
             if self.is_parameterized:
                 layer_input_size += self.n_input_channels + 1
                 # Each microphone's coordinates is encoded by a complex number,
-                # plus the room dimensions
+                # plus the rt60
 
             if self.activation == "relu":
                 activation = ComplexReLU
@@ -185,9 +184,9 @@ class SSLNET(nn.Module):
         else:
             layer_input_size = self.max_filters
             if self.is_parameterized:
-                layer_input_size += 2*(self.n_input_channels + 1)
+                layer_input_size += 2*(self.n_input_channels) + 1
                 # Each microphone's coordinates is encoded by two real numbers
-                # plus the two room dimensions
+                # plus the rt60
 
             if self.activation == "relu":
                 activation = nn.ReLU

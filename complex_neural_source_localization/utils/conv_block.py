@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from complex_neural_source_localization.utils.complexPyTorch.complexLayers import (
-    ComplexAmpTanh, ComplexConv2d, ComplexBatchNorm2d, ComplexDropout,
+    ComplexConv2d, ComplexBatchNorm2d, ComplexDropout,
     ComplexReLU, ComplexTanh, ComplexPReLU, ComplexAvgPool2d
 )
 from complex_neural_source_localization.utils.model_utilities import init_layer
@@ -36,8 +36,6 @@ class ConvBlock(nn.Module):
             dropout_block = ComplexDropout
             if activation == "relu":
                 self.activation = ComplexReLU()
-            elif activation == "amp_tanh":
-                self.activation = ComplexAmpTanh()
             elif activation == "tanh":
                 self.activation = ComplexTanh()
             elif activation == "prelu":
