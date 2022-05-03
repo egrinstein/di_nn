@@ -1,6 +1,6 @@
 from re import M
 import numpy as np
-from tdoa.math_utils import compute_doa
+from pysoundloc.math_utils import compute_doa
 
 
 def test_compute_doa_colinear():

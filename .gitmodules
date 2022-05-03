@@ -1,0 +1,3 @@
+[submodule "pysoundloc"]
+	path = pysoundloc
+	url = https://github.com/SOUNDS-RESEARCH/pysoundloc

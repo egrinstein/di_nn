@@ -3,8 +3,8 @@ import librosa
 import os
 from pyroomasync.room import ConnectedShoeBox
 from pyroomasync.simulator import simulate
-from tdoa.tdoa import compute_correlations
-from tdoa.visualization import plot_correlations
+from pysoundloc.tdoa import compute_correlations
+from pysoundloc.visualization import plot_correlations
 
 
 def test_plot_correlation():

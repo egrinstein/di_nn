@@ -2,7 +2,7 @@ import numpy as np
 
 from pyroomasync.room import ConnectedShoeBox
 from pyroomasync.simulator import simulate
-from tdoa.tdoa import compute_tdoas
+from pysoundloc.tdoa import compute_tdoas
 
 
 def test_compute_tdoas():
