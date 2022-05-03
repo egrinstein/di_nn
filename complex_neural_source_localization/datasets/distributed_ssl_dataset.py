@@ -3,13 +3,12 @@ is because in theory the random generator implemented in Sydra could be reused f
 applications using two microphones, while this generator is specific for this application.
 """
 
-from sympy import source
 import torch
 
 from complex_neural_source_localization.datasets.sydra_dataset import SydraDataset
 
 
-class SyntheticSSLDataset(SydraDataset):
+class DistributedSSLDataset(SydraDataset):
     def __init__(self, dataset_dir, is_parameterized=True, complex_parameters=True):
         super().__init__(dataset_dir)
 

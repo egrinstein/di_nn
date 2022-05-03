@@ -1,10 +1,10 @@
 import torch
 
 from .dcase_2019_task3_dataset import DCASE2019Task3Dataset
-from .synthetic_ssl_dataset import SyntheticSSLDataset
+from .distributed_ssl_dataset import DistributedSSLDataset
 
 DATASET_NAME_TO_CLASS_MAP = {
-    "synthetic_ssl": SyntheticSSLDataset,
+    "distributed_ssl": DistributedSSLDataset,
     "dcase_2019_task3": DCASE2019Task3Dataset
 }
 
