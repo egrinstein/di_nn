@@ -9,11 +9,12 @@ from complex_neural_source_localization.datasets.sydra_dataset import SydraDatas
 
 
 class DistributedSSLDataset(SydraDataset):
-    def __init__(self, dataset_dir, is_parameterized=True, complex_parameters=True):
+    def __init__(self, dataset_dir, is_parameterized=True, complex_parameters=True, stack_parameters=True):
         super().__init__(dataset_dir)
 
         self.is_parameterized = is_parameterized
         self.complex_parameters = complex_parameters
+        self.stack_parameters = stack_parameters
 
     def __getitem__(self, index):
 
@@ -21,7 +22,7 @@ class DistributedSSLDataset(SydraDataset):
         
         mic_coordinates = y["mic_coordinates"][:, :2] # Ignore z axis
         source_coordinates = y["source_coordinates"][:2]
-        room_dims = y["room_dims"][:2]
+        room_dims = y["room_dims"][:2].unsqueeze(0)
         rt60 = torch.Tensor([y["rt60"]])
 
         y = {
@@ -33,14 +34,23 @@ class DistributedSSLDataset(SydraDataset):
 
         if self.is_parameterized:
             if self.complex_parameters:
-                parameters = torch.complex(mic_coordinates[:, 0], mic_coordinates[:, 1])
-                parameters = torch.stack([parameters, torch.complex(rt60, 0)])
-            else:
-                parameters = torch.hstack([mic_coordinates.flatten(), rt60])
+                mic_coordinates = torch.complex(mic_coordinates[:, 0], mic_coordinates[:, 1])
+                room_dims = torch.complex(room_dims[0], room_dims[1])
+                rt60 = torch.complex(rt60, 0)
 
             x = {
-                "signal": x,
-                "parameters": parameters
+                "signal": x
             }
+
+            if self.stack_parameters:
+                if self.complex_parameters:
+                    x["parameters"] = torch.stack([mic_coordinates, room_dims, rt60])
+                else:
+                    x["parameters"] = torch.cat([
+                        mic_coordinates.flatten(), room_dims.flatten(), rt60])
+            else:
+                x["mic_coordinates"] = mic_coordinates
+                x["room_dims"] = room_dims
+                x["rt60"] = rt60
 
         return (x, y)

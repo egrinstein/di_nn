@@ -1,5 +1,6 @@
 import h5py
 import pickle
+from matplotlib import use
 import pytorch_lightning as pl
 import torch
 
@@ -13,8 +14,9 @@ from complex_neural_source_localization.utils.model_utilities import merge_list_
 SAVE_DIR = "logs/"
 LOG_EVERY_N_STEPS = 50
 
+
 class BaseTrainer(pl.Trainer):
-    def __init__(self, lightning_module, n_epochs):
+    def __init__(self, lightning_module, n_epochs, use_checkpoint_callback=True):
 
         gpus = 1 if torch.cuda.is_available() else 0
 
@@ -29,6 +31,10 @@ class BaseTrainer(pl.Trainer):
 
         tb_logger = pl_loggers.TensorBoardLogger(save_dir=SAVE_DIR)
         csv_logger = pl_loggers.CSVLogger(save_dir=SAVE_DIR)
+
+        callbacks=[progress_bar] # feature_map_callback],
+        if use_checkpoint_callback:
+            callbacks.append(checkpoint_callback)
 
         super().__init__(
             max_epochs=n_epochs,
@@ -134,8 +140,8 @@ class BaseLightningModule(pl.LightningModule):
     def fit(self, dataset_train, dataset_val):
         super().fit(self.model, dataset_train, val_dataloaders=dataset_val)
 
-    def test(self, dataset_test):
-        super().test(self.model, dataset_test, ckpt_path="best")
+    def test(self, dataset_test, ckpt_path="best"):
+        super().test(self.model, dataset_test, ckpt_path=ckpt_path)
 
 
 class FeatureMapLoggerCallback(Callback):

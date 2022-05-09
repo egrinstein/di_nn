@@ -9,36 +9,35 @@ DATASET_NAME_TO_CLASS_MAP = {
 }
 
 
-def create_dataloaders(config):
+def create_torch_dataloaders(config):
+    return (
+        create_torch_dataloader(config, "training"),
+        create_torch_dataloader(config, "validation"),
+        create_torch_dataloader(config, "test"),
+    )
 
-    dataset = DATASET_NAME_TO_CLASS_MAP[config["dataset"]["name"]]
-    dataset_train = dataset(config["dataset"]["training_dataset_dir"],
+
+def create_torch_dataloader(config, mode, stack_parameters=True):
+    if mode == "training":
+        dataset_path = config["dataset"]["training_dataset_dir"]
+        shuffle = False
+    elif mode == "validation":
+        dataset_path = config["dataset"]["validation_dataset_dir"]
+        shuffle = False
+    elif mode == "test":
+        dataset_path = config["dataset"]["test_dataset_dir"]
+        shuffle = False
+
+    dataset_class = DATASET_NAME_TO_CLASS_MAP[config["dataset"]["name"]]
+    dataset = dataset_class(dataset_path,
                             config["model"]["is_parameterized"],
-                            config["model"]["is_fully_complex"])
-    dataset_val = dataset(config["dataset"]["validation_dataset_dir"],
-                            config["model"]["is_parameterized"],
-                            config["model"]["is_fully_complex"])
-    dataset_test = dataset(config["dataset"]["test_dataset_dir"],
-                            config["model"]["is_parameterized"],
-                            config["model"]["is_fully_complex"])
-
-    batch_size = config["training"]["batch_size"]
-    n_workers = config["training"]["n_workers"]
-
-    dataloader_train = _create_torch_dataloader(dataset_train, batch_size,
-                                                n_workers, shuffle=True)
-    dataloader_val = _create_torch_dataloader(dataset_val, batch_size,
-                                              n_workers)
-    dataloader_test = _create_torch_dataloader(dataset_test, batch_size,
-                                               n_workers)
-
-    return dataloader_train, dataloader_val, dataloader_test
+                            config["model"]["is_fully_complex"],
+                            stack_parameters=stack_parameters)
 
 
-def _create_torch_dataloader(torch_dataset, batch_size, n_workers, shuffle=False):
-    return torch.utils.data.DataLoader(torch_dataset,
-                                       batch_size=batch_size,
-                                       shuffle=shuffle,
-                                       pin_memory=True,
-                                       drop_last=False,
-                                       num_workers=n_workers)
+    return torch.utils.data.DataLoader(dataset,
+                                    batch_size=config["training"]["batch_size"],
+                                    shuffle=shuffle,
+                                    pin_memory=True,
+                                    drop_last=False,
+                                    num_workers=config["training"]["n_workers"])

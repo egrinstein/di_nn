@@ -166,9 +166,9 @@ class SSLNET(nn.Module):
         if self.is_fully_complex:
             layer_input_size = self.max_filters//2
             if self.is_parameterized:
-                layer_input_size += self.n_input_channels + 1
+                layer_input_size += self.n_input_channels + 2
                 # Each microphone's coordinates is encoded by a complex number,
-                # plus the rt60
+                # plus the rt60, plus the room dims
 
             if self.activation == "relu":
                 activation = ComplexReLU
@@ -184,7 +184,7 @@ class SSLNET(nn.Module):
         else:
             layer_input_size = self.max_filters
             if self.is_parameterized:
-                layer_input_size += 2*(self.n_input_channels) + 1
+                layer_input_size += 2*(self.n_input_channels + 1) + 1
                 # Each microphone's coordinates is encoded by two real numbers
                 # plus the rt60
 

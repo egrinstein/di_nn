@@ -2,7 +2,7 @@ import hydra
 
 from omegaconf import DictConfig
 
-from complex_neural_source_localization.datasets import create_dataloaders
+from complex_neural_source_localization.datasets import create_torch_dataloaders
 from complex_neural_source_localization.trainer import SSLNETTrainer
 
 
@@ -16,7 +16,7 @@ def train(config: DictConfig):
                                         See the config/ directory for the configuration
     """
 
-    dataset_train, dataset_val, dataset_test = create_dataloaders(config)
+    dataset_train, dataset_val, dataset_test = create_torch_dataloaders(config)
     
     trainer = SSLNETTrainer(config)
 
