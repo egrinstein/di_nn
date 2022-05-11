@@ -13,6 +13,7 @@ GRID_SEARCH_RESOLUTION = 0.02
 
 
 def evaluate(batch):
+    print(batch)
     x, y = batch
     signals = x["signal"].numpy()
     mic_coordinates = x["mic_coordinates"].numpy()

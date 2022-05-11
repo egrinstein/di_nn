@@ -15,5 +15,5 @@ install:
 lint:
 	@flake8
 
-test-baseline:
+test_baseline:
 	@python test_baseline.py

@@ -35,9 +35,11 @@ def create_torch_dataloader(config, mode, stack_parameters=True):
                             stack_parameters=stack_parameters)
 
 
-    return torch.utils.data.DataLoader(dataset,
-                                    batch_size=config["training"]["batch_size"],
-                                    shuffle=shuffle,
-                                    pin_memory=True,
-                                    drop_last=False,
-                                    num_workers=config["training"]["n_workers"])
+    return torch.utils.data.DataLoader(
+        dataset,
+        batch_size=config["training"]["batch_size"],
+        shuffle=shuffle,
+        pin_memory=True,
+        drop_last=False,
+        num_workers=config["training"]["n_workers"]
+    )
