@@ -32,7 +32,8 @@ def create_torch_dataloader(config, mode, stack_parameters=True):
     dataset = dataset_class(dataset_path,
                             config["model"]["is_parameterized"],
                             config["model"]["is_fully_complex"],
-                            stack_parameters=stack_parameters)
+                            stack_parameters=stack_parameters,
+                            parameterize_room_dims_and_rt60=config["model"]["parameterize_room_dims_and_rt60"])
 
 
     return torch.utils.data.DataLoader(

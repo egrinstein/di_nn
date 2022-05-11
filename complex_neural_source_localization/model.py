@@ -25,6 +25,7 @@ class SSLNET(nn.Module):
                  is_fully_complex=False,
                  init_real_layers=True,
                  is_parameterized=False,
+                 parameterize_room_dims_and_rt60=False,
                  **kwargs):
         
         super().__init__()
@@ -42,6 +43,7 @@ class SSLNET(nn.Module):
         self.is_parameterized = is_parameterized # Parameterized Neural Network:
                                            # concatenate the microphone coordinates to the features before
                                            # feeding them to the fully connected layers
+        self.parameterize_room_dims_and_rt60 = parameterize_room_dims_and_rt60
 
         # 2. Create feature extractor
         self.feature_extractor = self._create_feature_extractor(feature_type, stft_config)
@@ -161,12 +163,12 @@ class SSLNET(nn.Module):
                           batch_first=True, bidirectional=True)
 
     def _create_fully_connected_block(self, n_sources, fc_layer_dropout_rate):
-        # TODO: Allow user to choose the number of linear layers
-        
         if self.is_fully_complex:
             layer_input_size = self.max_filters//2
             if self.is_parameterized:
-                layer_input_size += self.n_input_channels + 2
+                layer_input_size += self.n_input_channels
+                if self.parameterize_room_dims_and_rt60:
+                    layer_input_size += 2
                 # Each microphone's coordinates is encoded by a complex number,
                 # plus the rt60, plus the room dims
 
@@ -184,9 +186,11 @@ class SSLNET(nn.Module):
         else:
             layer_input_size = self.max_filters
             if self.is_parameterized:
-                layer_input_size += 2*(self.n_input_channels + 1) + 1
+                layer_input_size += 2*self.n_input_channels
+                if self.parameterize_room_dims_and_rt60:
+                    layer_input_size += 3
                 # Each microphone's coordinates is encoded by two real numbers
-                # plus the rt60
+                # 3 = room dims have width and length plus the rt60
 
             if self.activation == "relu":
                 activation = nn.ReLU
@@ -209,31 +213,6 @@ class SSLNET(nn.Module):
                     nn.Linear(layer_input_size, n_last_layer),
                 )
     
-    def track_feature_maps(self):
-        "Make all the intermediate layers accessible through the 'feature_maps' dictionary"
-
-        self.feature_maps = {}
-
-        hook_fn = self._create_hook_fn("stft")
-        self.feature_extractor.register_forward_hook(hook_fn)
-        
-        for i, conv_layer in enumerate(self.conv_blocks):
-            hook_fn = self._create_hook_fn(f"conv_{i}")
-            conv_layer.register_forward_hook(hook_fn)
-        
-        hook_fn = self._create_hook_fn("rnn")
-        self.rnn.register_forward_hook(hook_fn)
-
-        hook_fn = self._create_hook_fn("fully_connected")
-        self.fully_connected.register_forward_hook(hook_fn)
-
-    def _create_hook_fn(self, layer_id):
-        def fn(_, __, output):
-            if type(output) == tuple:
-                output = output[0]
-            self.feature_maps[layer_id] = output.detach().cpu()
-        return fn
-
 
 def complex_to_real(x, mode="real_imag", axis=1):
     if mode == "real_imag":

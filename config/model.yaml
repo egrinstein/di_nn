@@ -39,3 +39,5 @@ model:
   is_fully_complex: False
   init_real_layers: True
   is_parameterized: True
+
+  parameterize_room_dims_and_rt60: False

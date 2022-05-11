@@ -9,12 +9,14 @@ from complex_neural_source_localization.datasets.sydra_dataset import SydraDatas
 
 
 class DistributedSSLDataset(SydraDataset):
-    def __init__(self, dataset_dir, is_parameterized=True, complex_parameters=True, stack_parameters=True):
+    def __init__(self, dataset_dir, is_parameterized=True, complex_parameters=True,
+                 stack_parameters=True, parameterize_room_dims_and_rt60=True):
         super().__init__(dataset_dir)
 
         self.is_parameterized = is_parameterized
         self.complex_parameters = complex_parameters
         self.stack_parameters = stack_parameters
+        self.parameterize_room_dims_and_rt60 = parameterize_room_dims_and_rt60
 
     def __getitem__(self, index):
 
@@ -43,11 +45,15 @@ class DistributedSSLDataset(SydraDataset):
             }
 
             if self.stack_parameters:
-                if self.complex_parameters:
-                    x["parameters"] = torch.stack([mic_coordinates, room_dims, rt60])
+                if self.parameterize_room_dims_and_rt60:
+                    parameters = [mic_coordinates, room_dims, rt60]
                 else:
-                    x["parameters"] = torch.cat([
-                        mic_coordinates.flatten(), room_dims.flatten(), rt60])
+                    parameters = [mic_coordinates]
+
+                if self.complex_parameters:
+                    x["parameters"] = torch.stack(parameters)
+                else:
+                    x["parameters"] = torch.cat([p.flatten() for p in parameters])
             else:
                 x["mic_coordinates"] = mic_coordinates
                 x["room_dims"] = room_dims
