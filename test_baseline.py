@@ -12,7 +12,7 @@ SR = 16000
 GRID_SEARCH_RESOLUTION = 0.02
 
 
-def evaluate(batch):
+def test_batch(batch):
     print(batch)
     x, y = batch
     signals = x["signal"].numpy()
@@ -53,7 +53,7 @@ def test(config: DictConfig):
     dataset_test = create_torch_dataloader(config, "test", stack_parameters=False)
     
     results = Parallel(n_jobs=config["training"]["n_workers"])(
-        delayed(evaluate)(d)
+        delayed(test_batch)(d)
         for d in tqdm(dataset_test))
     
     errors = [result["errors"] for result in results]
