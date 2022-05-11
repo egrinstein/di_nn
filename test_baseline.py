@@ -60,7 +60,7 @@ def test(config: DictConfig):
     error = torch.mean(errors)
     std = torch.std(errors)
     print("Mean dataset error:", error)
-    print("Error standard deviation:", std``)
+    print("Error standard deviation:", std)
 
 
 if __name__ == "__main__":
