@@ -58,7 +58,9 @@ def test(config: DictConfig):
     errors = [result["errors"] for result in results]
     errors = torch.stack(errors)
     error = torch.mean(errors)
+    std = torch.std(errors)
     print("Mean dataset error:", error)
+    print("Error standard deviation:", std``)
 
 
 if __name__ == "__main__":
