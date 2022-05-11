@@ -20,7 +20,7 @@ def create_torch_dataloaders(config):
 def create_torch_dataloader(config, mode, stack_parameters=True):
     if mode == "training":
         dataset_path = config["dataset"]["training_dataset_dir"]
-        shuffle = False
+        shuffle = True
     elif mode == "validation":
         dataset_path = config["dataset"]["validation_dataset_dir"]
         shuffle = False

@@ -34,7 +34,7 @@ model:
 
   # Miscellaneous model settings
   fc_layer_dropout_rate: 0.0
-  activation: prelu # tanh | relu | prelu | amp_tanh
+  activation: relu # tanh | relu | prelu | amp_tanh
   pool_type: avg # max | avg
   is_fully_complex: False
   init_real_layers: True
