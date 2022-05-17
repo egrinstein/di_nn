@@ -1,13 +1,13 @@
 import torch
 
-from complex_neural_source_localization.utils.model_utilities import(
+from di_nn.utils.model_utilities import(
     get_all_layers
 )
-from complex_neural_source_localization.model import SSLNET
+from di_nn.model import DISSLNET
 
 
 def test_get_all_layers():
-    model = SSLNET()
+    model = DISSLNET()
 
     nm = [i for i in model.named_modules()]
     

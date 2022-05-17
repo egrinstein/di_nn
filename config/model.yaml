@@ -3,11 +3,9 @@ model:
   n_input_channels: 4
   n_fft: 1024
   window: hann
-  feature_type: stft # stft | cross_spectra
   use_onesided_fft: True
 
   # Output and optimization settings
-  output_type: scalar # scalar | frame
   target: source_coordinates # model target: azimuth_2d_point | normalized_tdoa | source_coordinates
   loss: l1 # angular | magnitude | l1
 
@@ -36,8 +34,7 @@ model:
   fc_layer_dropout_rate: 0.0
   activation: relu # tanh | relu | prelu | amp_tanh
   pool_type: avg # max | avg
-  is_fully_complex: False
-  init_real_layers: True
-  is_parameterized: True
+  init_layers: True
+  is_metadata_aware: True
 
-  parameterize_room_dims_and_rt60: True
+  use_room_dims_and_rt60: True

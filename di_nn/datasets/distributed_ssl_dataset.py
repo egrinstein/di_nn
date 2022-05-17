@@ -5,18 +5,17 @@ applications using two microphones, while this generator is specific for this ap
 
 import torch
 
-from complex_neural_source_localization.datasets.sydra_dataset import SydraDataset
+from di_nn.datasets.sydra_dataset import SydraDataset
 
 
 class DistributedSSLDataset(SydraDataset):
-    def __init__(self, dataset_dir, is_parameterized=True, complex_parameters=True,
-                 stack_parameters=True, parameterize_room_dims_and_rt60=True):
+    def __init__(self, dataset_dir, is_metadata_aware=True,
+                 stack_parameters=True, use_room_dims_and_rt60=True):
         super().__init__(dataset_dir)
 
-        self.is_parameterized = is_parameterized
-        self.complex_parameters = complex_parameters
+        self.is_metadata_aware = is_metadata_aware
         self.stack_parameters = stack_parameters
-        self.parameterize_room_dims_and_rt60 = parameterize_room_dims_and_rt60
+        self.use_room_dims_and_rt60 = use_room_dims_and_rt60
 
     def __getitem__(self, index):
 
@@ -34,26 +33,19 @@ class DistributedSSLDataset(SydraDataset):
             "rt60": rt60
         }
 
-        if self.is_parameterized:
-            if self.complex_parameters:
-                mic_coordinates = torch.complex(mic_coordinates[:, 0], mic_coordinates[:, 1])
-                room_dims = torch.complex(room_dims[0], room_dims[1])
-                rt60 = torch.complex(rt60, 0)
-
+        if self.is_metadata_aware:
             x = {
                 "signal": x
             }
 
             if self.stack_parameters:
-                if self.parameterize_room_dims_and_rt60:
+                if self.use_room_dims_and_rt60:
                     parameters = [mic_coordinates, room_dims, rt60]
                 else:
                     parameters = [mic_coordinates]
 
-                if self.complex_parameters:
-                    x["parameters"] = torch.stack(parameters)
-                else:
-                    x["parameters"] = torch.cat([p.flatten() for p in parameters])
+                x["parameters"] = torch.cat([p.flatten() for p in parameters])
+
             else:
                 x["mic_coordinates"] = mic_coordinates
                 x["room_dims"] = room_dims

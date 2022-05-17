@@ -8,7 +8,7 @@ from pytorch_lightning.callbacks import (
 )
 from pytorch_lightning import loggers as pl_loggers
 
-from complex_neural_source_localization.utils.model_utilities import merge_list_of_dicts
+from di_nn.utils.model_utilities import merge_list_of_dicts
 
 SAVE_DIR = "logs/"
 LOG_EVERY_N_STEPS = 50

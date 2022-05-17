@@ -5,7 +5,7 @@ from joblib import Parallel, delayed
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from complex_neural_source_localization.datasets import create_torch_dataloader
+from di_nn.datasets import create_torch_dataloader
 from pysoundloc.pysoundloc.least_squares_localization import least_squares_sound_localization
 
 SR = 16000

@@ -4,10 +4,10 @@ import torchaudio
 from hydra import compose, initialize
 from hydra.core.global_hydra import GlobalHydra
 
-from complex_neural_source_localization.feature_extractors import (
+from di_nn.feature_extractors import (
     StftArray, CrossSpectra
 )
-from complex_neural_source_localization.utils.model_visualization import (
+from di_nn.utils.model_visualization import (
     plot_multichannel_spectrogram
 )
 
