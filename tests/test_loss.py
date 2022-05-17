@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from di_nn.loss import Loss
-from di_nn.model import DISSLNET
+from di_nn.di_ssl_net import DISSLNET
 
 
 def test_neural_tdoa_loss():

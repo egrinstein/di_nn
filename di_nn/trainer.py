@@ -3,7 +3,7 @@ import torch
 
 from torch.optim.lr_scheduler import MultiStepLR
 
-from di_nn.model import DISSLNET
+from di_nn.di_ssl_net import DISSLNET
 from di_nn.loss import LOSS_NAME_TO_CLASS_MAP
 from di_nn.utils.base_trainer import (
     BaseTrainer, BaseLightningModule

@@ -1,5 +1,5 @@
 from di_nn.datasets.dcase_2019_task3_dataset import load_multichannel_wav
-from di_nn.model import DISSLNET
+from di_nn.di_ssl_net import DISSLNET
 
 
 def test_tdoa_crnn10_with_stft():

@@ -7,6 +7,7 @@ from di_nn.utils.conv_block import (
 from di_nn.utils.model_utilities import init_gru, init_layer
 
 
+# Base generic class to be inherited by the SSL specific network
 class DICRNN(nn.Module):
     def __init__(self, n_input_channels, n_output,
                  pool_type="avg", pool_size=(1,2), kernel_size=(2, 2),
