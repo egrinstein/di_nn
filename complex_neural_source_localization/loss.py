@@ -1,6 +1,6 @@
 import torch
 
-from torch.nn import Module, CosineSimilarity, MSELoss, L1Loss
+from torch.nn import Module, CosineSimilarity, L1Loss
 
 
 from torch.nn import Module
@@ -27,7 +27,7 @@ class CustomL1Loss(Module):
     def __init__(self, is_parameterized=True):
         super().__init__()
 
-        self.mse = L1Loss(reduction="none")
+        self.loss = L1Loss(reduction="none")
         self.target_key = "source_coordinates"
         self.is_parameterized = is_parameterized
 
@@ -38,8 +38,7 @@ class CustomL1Loss(Module):
                 "Model output's shape is {}, target's is {}".format(
                     model_output.shape, targets.shape
             ))
-        loss = self.mse(model_output, targets)
-
+        loss = self.loss(model_output, targets)
         if mean_reduce:
             loss = loss.mean()
         

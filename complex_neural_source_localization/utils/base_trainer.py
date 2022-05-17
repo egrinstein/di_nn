@@ -1,6 +1,5 @@
 import h5py
 import pickle
-from matplotlib import use
 import pytorch_lightning as pl
 import torch
 
