@@ -1,10 +1,17 @@
 sr: 16000
-training_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/reverb_moving/train/
-validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/reverb_moving/validation/
+training_dataset_dir: [
+  /Users/ezajlerg/datasets/pnn_dataset/multi_room_speech/train/,
+  /Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_40_4mics/train/
+]
+validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_40_4mics/validation
 test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_40_4mics/test
-metadata_training_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/anechoic_ef/train
-metadata_validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/anechoic_ef/validation
-metadata_test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/anechoic_ef/test
+
+metadata_training_dataset_dir: [
+  /Users/ezajlerg/datasets/pnn_dataset/reverb_ef/train,
+  /Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_ef/train
+]
+metadata_validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_ef/validation
+metadata_test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_ef/test
 
 num_mics: 4
 sample_duration_in_seconds: 1

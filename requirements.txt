@@ -1,9 +1,7 @@
-catalyst==21.5
 hydra-core==1.1.0
 librosa==0.8.1
 matplotlib==3.4.2
 pandas==1.2.4
-pyroomasync==0.0.23
 pytorch-lightning==1.4.2
 scikit-learn==0.24.2
 torch==1.9.0

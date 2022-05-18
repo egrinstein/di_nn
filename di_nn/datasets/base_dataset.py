@@ -67,7 +67,7 @@ def _load_dataframe(dataset_dir, metadata_dir=None):
         if metadata_dir is not None:
             metadata_dir = Path(metadata_dir)
             df["metadata_dir"] = df["signals_dir"].apply(
-            lambda x: metadata_dir / x / x)
+            lambda x: metadata_dir / x / x) # This is an ugly fix
 
         # 2. Get full paths to signals dir
         df["signals_dir"] = df["signals_dir"].apply(
