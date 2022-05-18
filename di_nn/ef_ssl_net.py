@@ -30,7 +30,7 @@ class EFSSLNET(nn.Module):
         self.kernel_size = kernel_size
         self.activation = activation
         self.max_filters = conv_layers_config[-1]["n_channels"]
-        
+
         # 2. Create Short Time Fourier Transform feature extractor
         self.stft_layer = DecoupledStftArray(stft_config)
 
@@ -41,7 +41,7 @@ class EFSSLNET(nn.Module):
                              activation=activation, init_layers=init_layers, is_metadata_aware=False)
     
     def forward(self, x):
-        parameters = x["parameters"]
+        parameters = x["metadata"]
         x = x["signal"]
 
         x = torch.cat([x, parameters], dim=1)

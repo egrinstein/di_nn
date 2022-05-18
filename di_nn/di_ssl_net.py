@@ -20,6 +20,7 @@ class DISSLNET(nn.Module):
                  init_layers=True,
                  is_metadata_aware=False,
                  use_room_dims_and_rt60=False,
+                 is_early_fusion=False,
                  **kwargs):
         
         super().__init__()
@@ -34,6 +35,7 @@ class DISSLNET(nn.Module):
         self.is_metadata_aware = is_metadata_aware # Parameterized Neural Network:
                                            # concatenate the microphone coordinates to the features before
                                            # feeding them to the fully connected layers
+        self.is_early_fusion = is_early_fusion # If true, signals and metadata will be merged at the input
         self.use_room_dims_and_rt60 = use_room_dims_and_rt60
         n_metadata = n_input_channels*2
         if use_room_dims_and_rt60:
@@ -47,11 +49,12 @@ class DISSLNET(nn.Module):
                              pool_size=pool_size, kernel_size=kernel_size,
                              conv_layers_config=conv_layers_config, fc_layer_dropout_rate=fc_layer_dropout_rate,
                              activation=activation, init_layers=init_layers, is_metadata_aware=is_metadata_aware,
+                             is_early_fusion=is_early_fusion,
                              n_metadata=n_metadata)
     
     def forward(self, x):
         if self.is_metadata_aware:
-            parameters = x["parameters"]
+            metadata = x["metadata"]
             x = x["signal"]
 
         # input: (batch_size, mic_channels, time_steps)
@@ -61,10 +64,15 @@ class DISSLNET(nn.Module):
         x = x.transpose(2, 3)
         # (batch_size, mic_channels, stft_time_steps, n_freqs)
 
+        if self.is_early_fusion:
+            # extract STFT for metadata as well
+            metadata = self.stft_layer(metadata)
+            metadata = metadata.transpose(2, 3)
+
         if self.is_metadata_aware:
-            # Repack signal and parameters into dictionary
+            # Repack signal and metadata into dictionary
             x = {
-                "parameters": parameters,
+                "metadata": metadata,
                 "signal": x
             }
 
