@@ -63,7 +63,6 @@ class DISSLNET(nn.Module):
         # (batch_size, mic_channels, n_freqs, stft_time_steps)
         x = x.transpose(2, 3)
         # (batch_size, mic_channels, stft_time_steps, n_freqs)
-
         if self.is_early_fusion:
             # extract STFT for metadata as well
             metadata = self.stft_layer(metadata)

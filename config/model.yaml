@@ -36,6 +36,6 @@ model:
   pool_type: avg # max | avg
   init_layers: True
   is_metadata_aware: True
-  is_early_fusion: True
+  is_early_fusion: False
 
   use_room_dims_and_rt60: True

@@ -45,7 +45,7 @@ class DistributedSSLDataset(BaseDataset):
                 "signal": x
             }
 
-            if self.metadata_dataset_dir: # Early fusion
+            if self.is_early_fusion:
                 x["metadata"] = y["metadata_signals"]
             else: # Late fusion
                 if self.stack_parameters:
