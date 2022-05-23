@@ -1,18 +1,15 @@
-import h5py
 import pickle
 import pytorch_lightning as pl
 import torch
 
 from pytorch_lightning.callbacks import (
-    Callback, ModelCheckpoint, TQDMProgressBar
+    ModelCheckpoint, TQDMProgressBar
 )
 from pytorch_lightning import loggers as pl_loggers
 
 from di_nn.utils.model_utilities import merge_list_of_dicts
 
 SAVE_DIR = "logs/"
-LOG_EVERY_N_STEPS = 50
-
 
 class BaseTrainer(pl.Trainer):
     def __init__(self, lightning_module, n_epochs, use_checkpoint_callback=True):
@@ -141,26 +138,6 @@ class BaseLightningModule(pl.LightningModule):
 
     def test(self, dataset_test, ckpt_path="best"):
         super().test(self.model, dataset_test, ckpt_path=ckpt_path)
-
-
-class FeatureMapLoggerCallback(Callback):
-    def on_test_start(self, trainer: BaseTrainer, pl_module: BaseLightningModule):
-        pl_module.model.track_feature_maps()
-
-        self.output_file = h5py.File("test_feature_maps.hdf5", "a")
-
-    def on_test_batch_end(self, trainer: BaseTrainer, pl_module: BaseLightningModule,
-                           outputs, batch, batch_idx: int, dataloader_idx: int):
-        feature_maps = pl_module.model.feature_maps
-
-        group = self.output_file.create_group(str(batch_idx))
-        for feature_name, feature_map in feature_maps.items():
-            group.create_dataset(feature_name, data=feature_map.numpy())
-
-        self.output_file 
-
-    def on_test_end(self, trainer, pl_module):
-        self.output_file.close()
 
 
 class CustomProgressBar(TQDMProgressBar):

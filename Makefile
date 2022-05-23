@@ -1,13 +1,7 @@
- .PHONY: install clean lint preprocessing
-
-test:
-	@pytest tests/
+ .PHONY: 
 
 train:
 	@python train.py
-
-visualizations:
-	@python visualizations.py
 
 install:
 	@pip install -r requirements.txt
