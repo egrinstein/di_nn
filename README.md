@@ -3,13 +3,21 @@ This repository contains the code for the neural networks and training scripts
 related to our NeurIPS2022 submission.
 
 ## Overview
-The `di_nn` repository contains the networks and training of our neural networks.
-The file `di_nn/utils/di_crnn.py` contains a base Torch model that is unrelated to our application of sound source localization.
-It is therefore the recommended entry point for those who want to use DI-NNs on their own domains.
-In turn, the file `di_nn/di_ssl_net.py` contains the network adapted for the task of sound source localization.
-The file `di_nn/trainer.py` contains a Pytorch lightning model for training.
+* The `di_nn` repository contains the networks and training of our neural networks.
+* The file `di_nn/utils/di_crnn.py` contains a base Torch model that is unrelated to our application of sound source localization. It is therefore the recommended entry point for those who want to use DI-NNs on their own domains.
+* In turn, the file `di_nn/di_ssl_net.py` contains the network adapted for the task of sound source localization.
+* The file `di_nn/trainer.py` contains a Pytorch lightning model for training.
+* The `pysoundloc` directory contains the Least Squares baseline.
 
-## Getting the data
+## Installation
+The requirements of this project are listed in the file `requirements.txt`
+Use the command `pip install -r requirements.txt` to install them.
+
+
+## Testing the model
+Under the directory `demo/`, you will find a Jupyter notebook as well as the model's pretrained weights and a small testing dataset.  
+
+## Generating the datasets
 Synthetic data was generated using a package created by the authors called SYDRA (SYnthetic Datasets for Room Acoustics).
 This package is included here for convenience under the `sydra` directory. The configuration of each generated dataset is governed by [Hydra](www.hydra.cc).
 
