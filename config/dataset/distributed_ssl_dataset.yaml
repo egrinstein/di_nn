@@ -1,21 +1,25 @@
 sr: 16000
 training_dataset_dir: [
-  /Users/***/datasets/pnn_dataset/multi_room_speech/train,
-  /Users/***/datasets/pnn_dataset/anechoic_moving/train
-  #/Users/***/datasets/pnn_dataset/libri_adhoc_40_4mics/train/
+  /Users/ezajlerg/datasets/pnn_dataset/multi_room_speech/train,
+  /Users/ezajlerg/datasets/pnn_dataset/anechoic_moving/train
+  #/Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_40_4mics/train/
 ]
-validation_dataset_dir: /Users/***/datasets/pnn_dataset/multi_room_speech/validation
-test_dataset_dir: /Users/***/datasets/pnn_dataset/multi_room_speech/test
+validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/multi_room_speech/validation
+test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/multi_room_speech/test
 
 metadata_training_dataset_dir: [
-  /Users/***/datasets/pnn_dataset/reverb_ef/train,
-  /Users/***/datasets/pnn_dataset/anechoic_ef/train
-  #/Users/***/datasets/pnn_dataset/libri_adhoc_ef/train
+  /Users/ezajlerg/datasets/pnn_dataset/reverb_ef/train,
+  /Users/ezajlerg/datasets/pnn_dataset/anechoic_ef/train
+  #/Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_ef/train
 ]
-metadata_validation_dataset_dir: /Users/***/datasets/pnn_dataset/reverb_ef/validation
-metadata_test_dataset_dir: /Users/***/datasets/pnn_dataset/reverb_ef/test
+metadata_validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/reverb_ef/validation
+metadata_test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/reverb_ef/test
 
 num_mics: 4
 sample_duration_in_seconds: 1
 n_max_sources: 1
 name: "distributed_ssl"
+
+# Sensitivity analysis
+metadata_microphone_std_in_m: 0.01
+metadata_rt60_std_in_ms: 100 

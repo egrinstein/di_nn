@@ -11,12 +11,17 @@ from di_nn.datasets.base_dataset import BaseDataset
 class DistributedSSLDataset(BaseDataset):
     def __init__(self, dataset_dir, is_metadata_aware=True, is_early_fusion=False,
                  stack_parameters=True, use_room_dims_and_rt60=True,
-                 metadata_dataset_dir=None):
+                 metadata_dataset_dir=None,
+                 metadata_microphone_std_in_m=0,
+                 metadata_rt60_std_in_ms=0):
         super().__init__(dataset_dir, metadata_dir=metadata_dataset_dir)
 
         self.is_metadata_aware = is_metadata_aware
         self.stack_parameters = stack_parameters
         self.use_room_dims_and_rt60 = use_room_dims_and_rt60
+
+        self.metadata_microphone_std_in_m = metadata_microphone_std_in_m
+        self.metadata_rt60_std_in_s = metadata_rt60_std_in_ms/1000 
 
         self.is_early_fusion = is_early_fusion
         if is_early_fusion and not metadata_dataset_dir:
@@ -33,12 +38,19 @@ class DistributedSSLDataset(BaseDataset):
         room_dims = y["room_dims"][:2].unsqueeze(0)
         rt60 = torch.Tensor([y["rt60"]])
 
+
+
         targets = {
             "source_coordinates": source_coordinates,
             "normalized_source_coordinates": source_coordinates/room_dims,
             "room_dims": room_dims,
             "rt60": rt60
         }
+
+        # Simulate measurement impresision for sensibility analysis
+        mic_coordinates = _simulate_measurement_imprecision(
+                            mic_coordinates, self.metadata_microphone_std_in_m)
+        rt60 = _simulate_measurement_imprecision(rt60, self.metadata_rt60_std_in_s)
 
         if self.is_metadata_aware:
             x = {
@@ -62,3 +74,9 @@ class DistributedSSLDataset(BaseDataset):
                     x["rt60"] = rt60
 
         return (x, targets)
+
+
+def _simulate_measurement_imprecision(measurement, std):
+    "Disturb the measurement by adding a gaussian value with standard deviation 'std'"
+    
+    return measurement + torch.randn(measurement.shape)*std
