@@ -22,4 +22,5 @@ name: "distributed_ssl"
 
 # Sensitivity analysis
 metadata_microphone_std_in_m: 0.01
-metadata_rt60_std_in_ms: 100 
+metadata_rt60_std_in_ms: 100
+disturb_metadata_on_test_only: False
