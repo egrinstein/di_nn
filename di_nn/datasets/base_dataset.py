@@ -77,6 +77,8 @@ def _load_dataframe(dataset_dir, metadata_dir=None):
     if type(dataset_dir) in [str, Path]:
         df = _load(dataset_dir, metadata_dir)
     else: # Multiple datasets
+        if metadata_dir is None:
+            metadata_dir = [None]*len(dataset_dir)
         dfs = [_load(d, m) for d, m in zip(dataset_dir, metadata_dir)]
         df = pd.concat(dfs, ignore_index=True)
 

@@ -14,6 +14,15 @@ class DistributedSSLDataset(BaseDataset):
                  metadata_dataset_dir=None,
                  metadata_microphone_std_in_m=0,
                  metadata_rt60_std_in_ms=0):
+
+        self.is_early_fusion = is_early_fusion
+        if is_early_fusion:
+            if metadata_dataset_dir is None:
+                raise ValueError(
+                    "If using early fusion, the directory containing precomputed metadata signals must be provided.")
+        else:
+            metadata_dataset_dir = None            
+
         super().__init__(dataset_dir, metadata_dir=metadata_dataset_dir)
 
         self.is_metadata_aware = is_metadata_aware
@@ -22,12 +31,6 @@ class DistributedSSLDataset(BaseDataset):
 
         self.metadata_microphone_std_in_m = metadata_microphone_std_in_m
         self.metadata_rt60_std_in_s = metadata_rt60_std_in_ms/1000 
-
-        self.is_early_fusion = is_early_fusion
-        if is_early_fusion and not metadata_dataset_dir:
-            raise ValueError(
-                "If using early fusion, the directory containing precomputed metadata signals must be provided.")
-        self.metadata_dataset_dir = metadata_dataset_dir
 
     def __getitem__(self, index):
 

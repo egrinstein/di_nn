@@ -12,7 +12,7 @@ metadata_training_dataset_dir: [
   /Users/ezajlerg/datasets/pnn_dataset/anechoic_ef/train
   #/Users/ezajlerg/datasets/pnn_dataset/libri_adhoc_ef/train
 ]
-metadata_validation_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/reverb_ef/validation
+metadata_validation_dataset_dir: /Users/ezajlerg/datasets/***/reverb_ef/validation
 metadata_test_dataset_dir: /Users/ezajlerg/datasets/pnn_dataset/reverb_ef/test
 
 num_mics: 4
