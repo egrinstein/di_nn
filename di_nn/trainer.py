@@ -20,8 +20,8 @@ class DISSLNETTrainer(BaseTrainer):
         super().fit(self._lightning_module, train_dataloaders,
                     val_dataloaders=val_dataloaders)
 
-    def test(self, test_dataloaders):
-        super().test(self._lightning_module, test_dataloaders, ckpt_path="best")
+    def test(self, test_dataloaders, ckpt_path="best"):
+        super().test(self._lightning_module, test_dataloaders, ckpt_path=ckpt_path)
 
 
 class DISSLNETLightniningModule(BaseLightningModule):

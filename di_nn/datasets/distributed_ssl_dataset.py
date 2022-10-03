@@ -41,8 +41,6 @@ class DistributedSSLDataset(BaseDataset):
         room_dims = y["room_dims"][:2].unsqueeze(0)
         rt60 = torch.Tensor([y["rt60"]])
 
-
-
         targets = {
             "source_coordinates": source_coordinates,
             "normalized_source_coordinates": source_coordinates/room_dims,
@@ -68,9 +66,7 @@ class DistributedSSLDataset(BaseDataset):
                         parameters = [mic_coordinates, room_dims, rt60]
                     else:
                         parameters = [mic_coordinates]
-
                     x["metadata"] = torch.cat([p.flatten() for p in parameters])
-
                 else:
                     x["mic_coordinates"] = mic_coordinates
                     x["room_dims"] = room_dims
@@ -81,5 +77,7 @@ class DistributedSSLDataset(BaseDataset):
 
 def _simulate_measurement_imprecision(measurement, std):
     "Disturb the measurement by adding a gaussian value with standard deviation 'std'"
-    
-    return measurement + torch.randn(measurement.shape)*std
+    #print("old measurement:", measurement)
+    measurement += torch.randn(measurement.shape)*std
+    #print("new measurement:", measurement)
+    return measurement

@@ -22,7 +22,8 @@ class StftArray(Module):
 
         for i in range(n_arrays):
             x = X[:, i, :]
-            stft_output = torch.stft(x, self.n_fft, onesided=self.onesided, return_complex=True)
+            stft_output = torch.stft(x, self.n_fft, onesided=self.onesided,
+                                     return_complex=True, normalized=True)
             result.append(
                 stft_output[:, 1:, :]
             ) # Ignore frequency 0

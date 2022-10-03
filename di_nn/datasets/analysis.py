@@ -33,13 +33,14 @@ def compute_dataset_microphone_distance(dataset_1_path, dataset_2_path):
 def _save_histogram(min_dists):
     print("Min distance:", min_dists.min())
     fig=plt.figure()
-    plt.title("Train vs test dataset minimum cum. microphone distance")
+    plt.title("Histogram of test dataset distance from training dataset")
     plt.xlabel("Minimum distance from training samples (m)")
-    plt.ylabel("Frequency (samples)")
+    plt.ylabel("Number of test dataset samples")
     plt.ion()
     plt.hist(min_dists, bins=50)
     plt.ioff()
     plt.savefig("hist.pdf")
+    plt.savefig("hist.png")
 
 
 if __name__ == "__main__":

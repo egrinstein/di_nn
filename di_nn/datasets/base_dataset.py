@@ -1,9 +1,10 @@
+import ast
 import pandas as pd
 import torch
 import torchaudio
-import ast
 
 from pathlib import Path
+from scipy.io import wavfile
 
 SR = 16000
 N_MICROPHONE_SECONDS = 1
@@ -36,7 +37,17 @@ class BaseDataset(torch.utils.data.Dataset):
             torchaudio.load(sample_metadata["signals_dir"] / f"{mic_idx}.wav")[0]
             for mic_idx in range(self.n_mics)
         ])
-        #x = x[:, :self.sample_duration]
+        # x = x[:, :self.sample_duration]
+
+        # x = [
+        #     torch.from_numpy(
+        #         wavfile.read(sample_metadata["signals_dir"] / f"{mic_idx}.wav")[1]
+        #     )
+        #     for mic_idx in range(self.n_mics)
+        # ]
+        # x = torch.vstack(x)
+
+
 
         # 2. Load low dimensional metadata
 
