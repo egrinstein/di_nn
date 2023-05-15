@@ -21,6 +21,7 @@ class DISSLNET(nn.Module):
                  is_metadata_aware=False,
                  use_room_dims_and_rt60=False,
                  is_early_fusion=False,
+                 use_metadata_embedding_layer=False,
                  **kwargs):
         
         super().__init__()
@@ -50,6 +51,7 @@ class DISSLNET(nn.Module):
                              conv_layers_config=conv_layers_config, fc_layer_dropout_rate=fc_layer_dropout_rate,
                              activation=activation, init_layers=init_layers, is_metadata_aware=is_metadata_aware,
                              is_early_fusion=is_early_fusion,
+                             use_metadata_embedding_layer=use_metadata_embedding_layer,
                              n_metadata=n_metadata)
     
     def forward(self, x):

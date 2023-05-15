@@ -37,5 +37,6 @@ model:
   init_layers: True
   is_metadata_aware: True
   is_early_fusion: False
+  use_metadata_embedding_layer: False
 
   use_room_dims_and_rt60: True

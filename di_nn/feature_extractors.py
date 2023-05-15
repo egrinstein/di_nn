@@ -28,7 +28,7 @@ class StftArray(Module):
                 stft_output[:, 1:, :]
             ) # Ignore frequency 0
         
-        result = torch.stack(result, dim=1)
+        result = torch.stack(result, dim=1) # Should transpose?
         return result
 
 

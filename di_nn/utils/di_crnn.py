@@ -18,6 +18,7 @@ class DICRNN(nn.Module):
                  is_metadata_aware=True,
                  n_metadata=None,
                  is_early_fusion=False,
+                 use_embedding_metadata_layer=False,
                  **kwargs):
         
         super().__init__()
@@ -33,6 +34,7 @@ class DICRNN(nn.Module):
                                                    # concatenate the microphone coordinates to the features before
                                                    # feeding them to the fully connected layers
         self.is_early_fusion = is_early_fusion
+        self.use_embedding_metadata_layer = use_embedding_metadata_layer
 
         if self.is_early_fusion:
             self.n_input_channels *= 2 # Add one extra channel per input for the metadata
@@ -54,6 +56,9 @@ class DICRNN(nn.Module):
         n_input_metadata_fusion_network = self.n_metadata_unaware_features
         if is_metadata_aware and not is_early_fusion:
             n_input_metadata_fusion_network += n_metadata
+
+        if use_embedding_metadata_layer:
+            self.metadata_embedding_layer = nn.Linear(n_metadata, n_metadata)
 
         self.metadata_fusion_network = MetadataFusionNetwork(
                                             n_input_metadata_fusion_network,
@@ -78,6 +83,9 @@ class DICRNN(nn.Module):
         if self.is_metadata_aware and not self.is_early_fusion:
             # Concatenate metadata before sending to fully connected layer,
             # if late fusion
+            if self.use_embedding_metadata_layer:
+                metadata = self.metadata_embedding_layer(metadata)
+
             x = torch.cat([x, metadata], dim=1)
             # (batch_size, n_metadata_unaware_features + n_metadata)
         
