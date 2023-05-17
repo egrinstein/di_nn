@@ -14,8 +14,6 @@ SAVE_DIR = "logs/"
 class BaseTrainer(pl.Trainer):
     def __init__(self, lightning_module, n_epochs, use_checkpoint_callback=True):
 
-        gpus = 1 if torch.cuda.is_available() else 0
-
         progress_bar = CustomProgressBar()
 
         checkpoint_callback = ModelCheckpoint(
@@ -38,7 +36,7 @@ class BaseTrainer(pl.Trainer):
                 checkpoint_callback, progress_bar, # feature_map_callback
             ],
             logger=[tb_logger, csv_logger],
-            gpus=gpus,
+            accelerator="auto",
             log_every_n_steps=25
         )
         
@@ -121,13 +119,13 @@ class BaseLightningModule(pl.LightningModule):
 
         return epoch_stats
     
-    def training_epoch_end(self, outputs):
+    def on_train_epoch_end(self, outputs):
         self._epoch_end(outputs)
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         self._epoch_end(outputs, epoch_type="validation")
 
-    def test_epoch_end(self, outputs):
+    def on_test_epoch_end(self, outputs):
         self._epoch_end(outputs, epoch_type="test", save_pickle=True)
 
     def forward(self, x):
