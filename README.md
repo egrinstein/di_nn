@@ -1,6 +1,6 @@
 # Dual-input neural networks (DI-NNs)
 This repository contains the code for the neural networks and training scripts
-related to our NeurIPS2022 submission.
+related to our EURASIP JASM paper
 
 ## Overview
 * The `di_nn` repository contains the networks and training of our neural networks.
