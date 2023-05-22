@@ -14,8 +14,6 @@ SAVE_DIR = "logs/"
 class BaseTrainer(pl.Trainer):
     def __init__(self, lightning_module, n_epochs, use_checkpoint_callback=True):
 
-        progress_bar = CustomProgressBar()
-
         checkpoint_callback = ModelCheckpoint(
             monitor="validation_loss",
             save_last=True,
@@ -26,7 +24,7 @@ class BaseTrainer(pl.Trainer):
         tb_logger = pl_loggers.TensorBoardLogger(save_dir=SAVE_DIR)
         csv_logger = pl_loggers.CSVLogger(save_dir=SAVE_DIR)
 
-        callbacks=[progress_bar] # feature_map_callback],
+        callbacks=[] # feature_map_callback],
         if use_checkpoint_callback:
             callbacks.append(checkpoint_callback)
 
@@ -35,9 +33,7 @@ class BaseTrainer(pl.Trainer):
 
         super().__init__(
             max_epochs=n_epochs,
-            callbacks=[
-                checkpoint_callback, progress_bar, # feature_map_callback
-            ],
+            callbacks=callbacks,
             logger=[tb_logger, csv_logger],
             accelerator=accelerator,
             log_every_n_steps=25
@@ -144,11 +140,3 @@ class BaseLightningModule(pl.LightningModule):
 
     def test(self, dataset_test, ckpt_path="best"):
         super().test(self.model, dataset_test, ckpt_path=ckpt_path)
-
-
-class CustomProgressBar(TQDMProgressBar):
-    def get_metrics(self, trainer, model):
-        # don't show the version number
-        items = super().get_metrics(trainer, model)
-        items.pop("v_num", None)
-        return items
