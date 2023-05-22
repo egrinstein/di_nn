@@ -30,13 +30,16 @@ class BaseTrainer(pl.Trainer):
         if use_checkpoint_callback:
             callbacks.append(checkpoint_callback)
 
+        accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+        # Don't use MPS, which is a nightmare 
+
         super().__init__(
             max_epochs=n_epochs,
             callbacks=[
                 checkpoint_callback, progress_bar, # feature_map_callback
             ],
             logger=[tb_logger, csv_logger],
-            accelerator="auto",
+            accelerator=accelerator,
             log_every_n_steps=25
         )
         
@@ -52,15 +55,18 @@ class BaseLightningModule(pl.LightningModule):
                  log_step=50):
         super().__init__()
 
-        self.is_cuda_available = torch.cuda.is_available()
-
         self.model = model
         self.loss = loss
 
         self.log_step = log_step
+        self.outputs = {
+            "train": [],
+            "validation": [],
+            "test": []
+        }
 
     def _step(self, batch, batch_idx, log_model_output=False,
-              log_labels=False):
+              log_labels=False, epoch_type="train"):
 
         x, y = batch
 
@@ -86,22 +92,24 @@ class BaseLightningModule(pl.LightningModule):
         # 4. Log step metrics
         self.log("loss_step", output_dict["loss"], on_step=True, prog_bar=False)
 
+        self.outputs[epoch_type].append(output_dict)
+
         return output_dict
 
     def training_step(self, batch, batch_idx):
-        return self._step(batch, batch_idx)
+        return self._step(batch, batch_idx, epoch_type="train")
   
     def validation_step(self, batch, batch_idx):
-        return self._step(batch, batch_idx,
+        return self._step(batch, batch_idx, epoch_type="validation",
                           log_model_output=True, log_labels=True)
     
     def test_step(self, batch, batch_idx):
-        return self._step(batch, batch_idx,
+        return self._step(batch, batch_idx, epoch_type="test",
                           log_model_output=True, log_labels=True)
     
-    def _epoch_end(self, outputs, epoch_type="train", save_pickle=False):
+    def _epoch_end(self, epoch_type="train", save_pickle=False):
         # 1. Compute epoch metrics
-        outputs = merge_list_of_dicts(outputs)
+        outputs = merge_list_of_dicts(self.outputs[epoch_type])
         epoch_stats = {
             f"{epoch_type}_loss": outputs["loss"].mean(),
             f"{epoch_type}_std": outputs["loss"].std()
@@ -119,14 +127,14 @@ class BaseLightningModule(pl.LightningModule):
 
         return epoch_stats
     
-    def on_train_epoch_end(self, outputs):
-        self._epoch_end(outputs)
+    def on_train_epoch_end(self):
+        self._epoch_end()
 
-    def on_validation_epoch_end(self, outputs):
-        self._epoch_end(outputs, epoch_type="validation")
+    def on_validation_epoch_end(self):
+        self._epoch_end(epoch_type="validation")
 
-    def on_test_epoch_end(self, outputs):
-        self._epoch_end(outputs, epoch_type="test", save_pickle=True)
+    def on_test_epoch_end(self):
+        self._epoch_end(epoch_type="test", save_pickle=True)
 
     def forward(self, x):
         return self.model(x)
