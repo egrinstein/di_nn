@@ -97,11 +97,11 @@ class BaseLightningModule(pl.LightningModule):
   
     def validation_step(self, batch, batch_idx):
         return self._step(batch, batch_idx, epoch_type="validation",
-                          log_model_output=True, log_labels=True)
+                          log_model_output=False, log_labels=False)
     
     def test_step(self, batch, batch_idx):
         return self._step(batch, batch_idx, epoch_type="test",
-                          log_model_output=True, log_labels=True)
+                          log_model_output=False, log_labels=False)
     
     def _epoch_end(self, epoch_type="train", save_pickle=False):
         # 1. Compute epoch metrics
