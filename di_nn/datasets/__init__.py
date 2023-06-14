@@ -32,14 +32,16 @@ def create_torch_dataloader(config, mode, stack_parameters=True):
         metadata_microphone_std_in_m = config["dataset"]["metadata_microphone_std_in_m"]
         metadata_rt60_std_in_ms = config["dataset"]["metadata_rt60_std_in_ms"]
 
-    dataset = DistributedSSLDataset(dataset_path,
-                            config["model"]["is_metadata_aware"],
-                            stack_parameters=stack_parameters,
-                            use_room_dims_and_rt60=config["model"]["use_room_dims_and_rt60"],
-                            is_early_fusion=config["model"]["is_early_fusion"],
-                            metadata_dataset_dir=metadata_path,
-                            metadata_microphone_std_in_m=metadata_microphone_std_in_m,
-                            metadata_rt60_std_in_ms=metadata_rt60_std_in_ms)
+    metadata_config = config["model"]["metadata_config"]
+
+    dataset = DistributedSSLDataset(
+        dataset_path,
+        stack_parameters=stack_parameters,
+        metadata_dataset_dir=metadata_path,
+        metadata_microphone_std_in_m=metadata_microphone_std_in_m,
+        metadata_rt60_std_in_ms=metadata_rt60_std_in_ms,
+        metadata_config=metadata_config
+    )
 
     return torch.utils.data.DataLoader(
         dataset,

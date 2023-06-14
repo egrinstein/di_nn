@@ -15,8 +15,7 @@ class DICRNN(nn.Module):
                  fc_layer_dropout_rate=0.5,
                  activation="relu",
                  init_layers=True,
-                 is_metadata_aware=True,
-                 n_metadata=None,
+                 n_metadata=0,
                  is_early_fusion=False,
                  use_embedding_metadata_layer=False,
                  **kwargs):
@@ -30,7 +29,7 @@ class DICRNN(nn.Module):
         self.kernel_size = kernel_size
         self.activation = activation
         self.n_metadata_unaware_features = conv_layers_config[-1]["n_channels"]
-        self.is_metadata_aware = is_metadata_aware # Parameterized Neural Network:
+        self.is_metadata_aware = n_metadata > 0 # Parameterized Neural Network:
                                                    # concatenate the microphone coordinates to the features before
                                                    # feeding them to the fully connected layers
         self.is_early_fusion = is_early_fusion
@@ -38,9 +37,6 @@ class DICRNN(nn.Module):
 
         if self.is_early_fusion:
             self.n_input_channels *= 2 # Add one extra channel per input for the metadata
-
-        if is_metadata_aware and n_metadata is None:
-            raise ValueError("Metadata size must be provided")
 
         # 2. Create feature extraction network
         self.feature_extraction_network = FeatureExtractionNetwork(
@@ -54,7 +50,7 @@ class DICRNN(nn.Module):
     
         # 3. Create metadata fusion network
         n_input_metadata_fusion_network = self.n_metadata_unaware_features
-        if is_metadata_aware and not is_early_fusion:
+        if self.is_metadata_aware and not is_early_fusion:
             n_input_metadata_fusion_network += n_metadata
 
         if use_embedding_metadata_layer:

@@ -6,17 +6,21 @@ applications using two microphones, while this generator is specific for this ap
 import torch
 
 from di_nn.datasets.base_dataset import BaseDataset
+from di_nn.utils.metadata import DEFAULT_METADATA_CONFIG
 
 
 class DistributedSSLDataset(BaseDataset):
-    def __init__(self, dataset_dir, is_metadata_aware=True, is_early_fusion=False,
-                 stack_parameters=True, use_room_dims_and_rt60=True,
+    def __init__(self, dataset_dir,
+                 stack_parameters=True,
                  metadata_dataset_dir=None,
                  metadata_microphone_std_in_m=0,
-                 metadata_rt60_std_in_ms=0):
+                 metadata_rt60_std_in_ms=0,
+                 metadata_config=DEFAULT_METADATA_CONFIG):
 
-        self.is_early_fusion = is_early_fusion
-        if is_early_fusion:
+        self.metadata_config = metadata_config
+        self.is_early_fusion = metadata_config["is_early_fusion"]
+        
+        if self.is_early_fusion:
             if metadata_dataset_dir is None:
                 raise ValueError(
                     "If using early fusion, the directory containing precomputed metadata signals must be provided.")
@@ -25,9 +29,13 @@ class DistributedSSLDataset(BaseDataset):
 
         super().__init__(dataset_dir, metadata_dir=metadata_dataset_dir)
 
-        self.is_metadata_aware = is_metadata_aware
+        self.use_mic_positions = metadata_config["use_mic_positions"]
+        self.use_room_dims = metadata_config["use_room_dims"]
+        self.use_rt60 = metadata_config["use_rt60"]
+
+        self.is_metadata_aware = self.use_mic_positions or self.use_room_dims or self.use_rt60
+
         self.stack_parameters = stack_parameters
-        self.use_room_dims_and_rt60 = use_room_dims_and_rt60
 
         self.metadata_microphone_std_in_m = metadata_microphone_std_in_m
         self.metadata_rt60_std_in_s = metadata_rt60_std_in_ms/1000 
@@ -61,16 +69,20 @@ class DistributedSSLDataset(BaseDataset):
             if self.is_early_fusion:
                 x["metadata"] = y["metadata_signals"]
             else: # Late fusion
+                metadata = {}
+                if self.use_mic_positions:
+                    metadata["mic_coordinates"] = mic_coordinates
+                if self.use_room_dims:
+                    metadata["room_dims"] = room_dims
+                if self.use_rt60:
+                    metadata["rt60"] = rt60
+
                 if self.stack_parameters:
-                    if self.use_room_dims_and_rt60:
-                        parameters = [mic_coordinates, room_dims, rt60]
-                    else:
-                        parameters = [mic_coordinates]
-                    x["metadata"] = torch.cat([p.flatten() for p in parameters])
+                    x["metadata"] = torch.cat([
+                        p.flatten() for p in metadata.values()
+                    ])
                 else:
-                    x["mic_coordinates"] = mic_coordinates
-                    x["room_dims"] = room_dims
-                    x["rt60"] = rt60
+                    x["metadata"] = metadata
 
         return (x, targets)
 

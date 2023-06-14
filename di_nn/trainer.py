@@ -41,9 +41,11 @@ class DISSLNETLightniningModule(BaseLightningModule):
             "use_onesided_fft": config["model"]["use_onesided_fft"]
         }
 
-        model = DISSLNET(n_sources=n_sources,
-                        stft_config=stft_config,
-                        **config["model"])
+        model = DISSLNET(
+            n_sources=n_sources,
+            stft_config=stft_config,
+            **config["model"]
+        )
 
         loss = LOSS_NAME_TO_CLASS_MAP[self.config["model"]["loss"]]()
 

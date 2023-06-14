@@ -35,8 +35,10 @@ model:
   activation: relu # tanh | relu | prelu | amp_tanh
   pool_type: avg # max | avg
   init_layers: True
-  is_metadata_aware: True
-  is_early_fusion: False
-  use_metadata_embedding_layer: True
-
-  use_room_dims_and_rt60: True
+  
+  metadata_config:
+    is_early_fusion: False
+    use_metadata_embedding_layer: True
+    use_mic_positions: True
+    use_room_dims: True
+    use_rt60: False
