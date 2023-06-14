@@ -2,9 +2,7 @@ import pickle
 import pytorch_lightning as pl
 import torch
 
-from pytorch_lightning.callbacks import (
-    ModelCheckpoint, TQDMProgressBar
-)
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
 
 from di_nn.utils.model_utilities import merge_list_of_dicts
@@ -21,8 +19,8 @@ class BaseTrainer(pl.Trainer):
             save_weights_only=True
         )
 
-        tb_logger = pl_loggers.TensorBoardLogger(save_dir=SAVE_DIR)
-        csv_logger = pl_loggers.CSVLogger(save_dir=SAVE_DIR)
+        # tb_logger = pl_loggers.TensorBoardLogger(save_dir=SAVE_DIR)
+        # csv_logger = pl_loggers.CSVLogger(save_dir=SAVE_DIR)
 
         callbacks=[] # feature_map_callback],
         if use_checkpoint_callback:
@@ -34,7 +32,7 @@ class BaseTrainer(pl.Trainer):
         super().__init__(
             max_epochs=n_epochs,
             callbacks=callbacks,
-            logger=[tb_logger, csv_logger],
+            #logger=[tb_logger, csv_logger],
             accelerator=accelerator,
             log_every_n_steps=25
         )
