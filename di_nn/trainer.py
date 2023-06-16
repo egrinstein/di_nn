@@ -49,7 +49,8 @@ class DISSLNETLightniningModule(BaseLightningModule):
 
         loss = LOSS_NAME_TO_CLASS_MAP[self.config["model"]["loss"]]()
 
-        super().__init__(model, loss)
+        super().__init__(model, loss,
+                         checkpoint_path=config["training"]["checkpoint_path"])
 
     def configure_optimizers(self):
         lr = self.config["training"]["learning_rate"]

@@ -41,4 +41,4 @@ model:
     use_metadata_embedding_layer: True
     use_mic_positions: True
     use_room_dims: True
-    use_rt60: False
+    use_rt60: True

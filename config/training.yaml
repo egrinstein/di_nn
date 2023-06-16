@@ -5,3 +5,4 @@ training:
   learning_rate_decay_steps: [3, 8]
   learning_rate_decay_values: 0.5
   n_workers: 10
+  checkpoint_path: ""

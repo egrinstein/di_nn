@@ -19,7 +19,7 @@ class BaseTrainer(pl.Trainer):
             save_weights_only=True
         )
 
-        # tb_logger = pl_loggers.TensorBoardLogger(save_dir=SAVE_DIR)
+        tb_logger = pl_loggers.TensorBoardLogger(save_dir=SAVE_DIR)
         # csv_logger = pl_loggers.CSVLogger(save_dir=SAVE_DIR)
 
         callbacks=[] # feature_map_callback],
@@ -32,7 +32,7 @@ class BaseTrainer(pl.Trainer):
         super().__init__(
             max_epochs=n_epochs,
             callbacks=callbacks,
-            #logger=[tb_logger, csv_logger],
+            logger=[tb_logger],
             accelerator=accelerator,
             log_every_n_steps=25
         )
@@ -46,7 +46,7 @@ class BaseLightningModule(pl.LightningModule):
     """
 
     def __init__(self, model, loss,
-                 log_step=50):
+                 log_step=50, checkpoint_path=""):
         super().__init__()
 
         self.model = model
@@ -58,6 +58,13 @@ class BaseLightningModule(pl.LightningModule):
             "validation": [],
             "test": []
         }
+
+        if checkpoint_path:
+            print("Loading checkpoint from {}".format(checkpoint_path))
+            device = self.get_device()
+            state_dict = torch.load(
+                checkpoint_path, map_location=device)["state_dict"]
+            self.load_state_dict(state_dict)
 
     def _step(self, batch, batch_idx, log_model_output=False,
               log_labels=False, epoch_type="train"):
@@ -104,6 +111,7 @@ class BaseLightningModule(pl.LightningModule):
     def _epoch_end(self, epoch_type="train", save_pickle=False):
         # 1. Compute epoch metrics
         outputs = merge_list_of_dicts(self.outputs[epoch_type])
+        self.outputs[epoch_type] = []
         epoch_stats = {
             f"{epoch_type}_loss": outputs["loss"].mean(),
             f"{epoch_type}_std": outputs["loss"].std()
@@ -138,3 +146,6 @@ class BaseLightningModule(pl.LightningModule):
 
     def test(self, dataset_test, ckpt_path="best"):
         super().test(self.model, dataset_test, ckpt_path=ckpt_path)
+
+    def get_device(self):
+        return next(self.model.parameters()).device
