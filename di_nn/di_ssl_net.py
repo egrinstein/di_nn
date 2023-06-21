@@ -35,8 +35,10 @@ class DISSLNET(nn.Module):
         # 2. Metadata configuration
         self.metadata_config = metadata_config
         
+
         self.is_early_fusion = metadata_config["is_early_fusion"] # If true, signals and metadata will be merged at the input
-        
+        self.use_metadata_embedding_layer = metadata_config["use_metadata_embedding_layer"]
+
         n_metadata = 0
         if metadata_config["use_mic_positions"]:
             n_metadata += n_input_channels*2
@@ -47,7 +49,6 @@ class DISSLNET(nn.Module):
 
         self.is_metadata_aware = n_metadata > 0
 
-        print("N_METADATA: ", n_metadata)
         # 2. Create Short Time Fourier Transform feature extractor
         self.stft_layer = DecoupledStftArray(stft_config)
 
@@ -57,7 +58,7 @@ class DISSLNET(nn.Module):
                              conv_layers_config=conv_layers_config, fc_layer_dropout_rate=fc_layer_dropout_rate,
                              activation=activation, init_layers=init_layers,
                              is_early_fusion=metadata_config["is_early_fusion"],
-                             use_metadata_embedding_layer=metadata_config["use_metadata_embedding_layer"],
+                             use_metadata_embedding_layer=self.use_metadata_embedding_layer,
                              n_metadata=n_metadata)
     
     def forward(self, x):
