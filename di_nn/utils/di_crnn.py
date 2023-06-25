@@ -53,7 +53,11 @@ class DICRNN(nn.Module):
             n_input_metadata_fusion_network += n_metadata
 
         if use_metadata_embedding_layer:
-            self.metadata_embedding_layer = nn.Linear(n_metadata, n_metadata)
+            self.metadata_embedding_layer = nn.Sequential(
+                nn.Linear(n_metadata, 2*n_metadata),
+                nn.ReLU(),
+                nn.Linear(2*n_metadata, n_metadata),
+            )
         self.metadata_fusion_network = MetadataFusionNetwork(
                                             n_input_metadata_fusion_network,
                                             n_output,
@@ -78,7 +82,6 @@ class DICRNN(nn.Module):
             # Concatenate metadata before sending to fully connected layer,
             # if late fusion
             if self.use_metadata_embedding_layer:
-                
                 metadata = self.metadata_embedding_layer(metadata)
 
             x = torch.cat([x, metadata], dim=1)
