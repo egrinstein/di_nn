@@ -35,6 +35,7 @@ model:
   activation: relu # tanh | relu | prelu | amp_tanh
   pool_type: avg # max | avg
   init_layers: True
+  normalize_input: True
   
   metadata_config:
     is_early_fusion: False

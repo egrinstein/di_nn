@@ -18,6 +18,7 @@ class DICRNN(nn.Module):
                  n_metadata=0,
                  is_early_fusion=False,
                  use_metadata_embedding_layer=False,
+                 normalize_input=False,
                  **kwargs):
         super().__init__()
 
@@ -36,6 +37,12 @@ class DICRNN(nn.Module):
 
         if self.is_early_fusion:
             self.n_input_channels *= 2 # Add one extra channel per input for the metadata
+
+
+        self.use_batch_norm_input = normalize_input
+        if self.use_batch_norm_input:
+            self.input_bn = nn.BatchNorm2d(self.n_input_channels)
+            self.metadata_bn = nn.BatchNorm1d(1)
 
         # 2. Create feature extraction network
         self.feature_extraction_network = FeatureExtractionNetwork(
@@ -69,6 +76,11 @@ class DICRNN(nn.Module):
         if self.is_metadata_aware:
             metadata = x["metadata"]
             x = x["signal"]
+
+            if self.use_batch_norm_input:
+                x = self.input_bn(x)
+
+                metadata = self.metadata_bn(metadata.unsqueeze(1)).squeeze(1)
 
             if self.is_early_fusion:
                 # Concatenate metadata before sending to Feature extraction network

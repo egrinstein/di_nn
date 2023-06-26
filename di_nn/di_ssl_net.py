@@ -20,6 +20,7 @@ class DISSLNET(nn.Module):
                  activation="relu",
                  init_layers=True,
                  metadata_config=DEFAULT_METADATA_CONFIG,
+                 normalize_input=False,
                  **kwargs):
         
         super().__init__()
@@ -59,6 +60,7 @@ class DISSLNET(nn.Module):
                              activation=activation, init_layers=init_layers,
                              is_early_fusion=metadata_config["is_early_fusion"],
                              use_metadata_embedding_layer=self.use_metadata_embedding_layer,
+                             normalize_input=normalize_input,
                              n_metadata=n_metadata)
     
     def forward(self, x):
