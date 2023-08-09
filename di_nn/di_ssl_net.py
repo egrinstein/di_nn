@@ -10,6 +10,7 @@ from di_nn.utils.conv_block import (
 from di_nn.utils.metadata import DEFAULT_METADATA_CONFIG
 from di_nn.utils.di_crnn import DICRNN
 
+from torchsummary import summary
 
 class DISSLNET(nn.Module):
     def __init__(self, n_input_channels=4,
@@ -63,6 +64,7 @@ class DISSLNET(nn.Module):
                              normalize_input=normalize_input,
                              n_metadata=n_metadata)
     
+        print(self)
     def forward(self, x):
         if self.is_metadata_aware:
             metadata = x["metadata"]
